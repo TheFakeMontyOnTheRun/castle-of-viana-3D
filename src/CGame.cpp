@@ -32,7 +32,7 @@ namespace odb {
         float dy = ry - ry0;
 
         RayCollision collision;
-        collision.mCachedDistance = (( dx * dx ) + ( dy * dy ));
+        collision.mCachedDistance = sqrt(( dx * dx ) + ( dy * dy ));
         return collision;
     }
 

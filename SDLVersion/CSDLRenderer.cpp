@@ -100,8 +100,7 @@ namespace odb {
         for (int d = -45; d < 45; ++d) {
 
             float ray = mGameSnapshot.mCurrentScan[ d + 45 ].mCachedDistance;
-            int distance = 2 * (40 * Q_rsqrt(ray)) * yRes / 2 / 40;
-            ray = sqrt( ray );
+            int distance = (yRes / ray);
             float sin_a = sin( wrap360( mGameSnapshot.mAngle + d) * ( 3.14159f / 180.0f) );
             float cos_a = cos( wrap360( mGameSnapshot.mAngle + d) * ( 3.14159f / 180.0f) );
             float hueX =  mGameSnapshot.mCamera.mX + ( ray * ( sin_a ) );
