@@ -14,9 +14,25 @@ namespace odb {
         kFire2
     };
 
+    class Vec2f {
+    public:
+      float mX = 0;
+      float mY = 0;
+    };
+
+    class RayCollision {
+    public:
+        float mCachedDistance = 0;
+        Vec2f mCollisionPoint = {0,0};
+    };
+
     using MapLine = std::array<int, 20>;
     using IntGameMap = std::array<MapLine, 20>;
 
     using CControlCallback = std::function< void(ECommand) >;
+
+
+    float Q_rsqrt( float number );
+    int wrap360(int i);
 }
 #endif //BLANKSLATE_COMMON_H

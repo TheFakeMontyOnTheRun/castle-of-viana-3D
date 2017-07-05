@@ -2,14 +2,22 @@
 #include <functional>
 #include <array>
 #include <vector>
+#include <memory>
 
 #include "Common.h"
 #include "CRenderer.h"
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+#include <cmath>
+#include "NativeBitmap.h"
+#include "LoadPNG.h"
 
 namespace odb {
+    const int xRes = 800;
+    const int yRes = 600;
+
+    auto texture = loadPNG("res/tile0.png");
 
     SDL_Surface *video;
 
@@ -17,7 +25,7 @@ namespace odb {
     mOnKeyPressedCallback( keyPressedCallback ), mOnKeyReleasedCallback( keyReleasedCallback )
     {
         SDL_Init( SDL_INIT_EVERYTHING );
-        video = SDL_SetVideoMode( 640, 480, 0, 0 );
+        video = SDL_SetVideoMode( xRes, yRes, 32, 0 );
     }
 
     void CRenderer::setSnapshot( const CGameSnapshot& snapshot ) {
@@ -54,12 +62,22 @@ namespace odb {
             }
 
             if ( event.type == SDL_KEYDOWN ) {
-                switch ( event.key.keysym.sym ) {
-		case SDLK_LEFT:
-		  mOnKeyPressedCallback( ECommand::kLeft );
-		  break;
-		default:
-		  break;
+                switch (event.key.keysym.sym) {
+                    case SDLK_LEFT:
+                        mOnKeyPressedCallback(ECommand::kLeft);
+                        break;
+                    case SDLK_RIGHT:
+                        mOnKeyPressedCallback(ECommand::kRight);
+                        break;
+                    case SDLK_UP:
+                        mOnKeyPressedCallback(ECommand::kUp);
+                        break;
+                    case SDLK_DOWN:
+                        mOnKeyPressedCallback(ECommand::kDown);
+                        break;
+
+                    default:
+                        break;
                 }
             }
 
@@ -68,45 +86,54 @@ namespace odb {
 
     void CRenderer::render( long ms ) {
         SDL_Rect rect;
-	std::vector<std::tuple< int, int, int >> toDraw;
-        rect = { 0, 0, 640, 480 };
-        SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 0, 0, 0 ) );
 
-        int y = 0;
-        int x = 0;
-	int val = 0;
-        for ( auto line : mGameSnapshot.state ) {
-            x = 0;
-            ++y;
-            for ( auto item : line ) {
-                ++x;
-		toDraw.emplace_back( x, y, item );
-	    }
-	}
+        rect = { 0, 0, xRes, yRes };
+        SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 96, 96, 96 ) );
 
-	for ( auto pair : mGameSnapshot.visited ) {
-	  toDraw.emplace_back( pair.first, pair.second, 3 );
-	}
+        rect = { 0, yRes / 2, xRes, yRes / 2};
+        SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 192, 192, 192 ) );
 
-	for ( auto tuple : toDraw ) {
-	
-	  x = std::get<0>(tuple);
-	  y = std::get<1>(tuple);
-	  val = std::get<2>(tuple);
 
-	  rect = { (Sint16)(x * 20), (Sint16)(y * 20), 20, 20 };
-	  
-	  if ( val == 1 ) {
-	    SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 128, 128, 128 ) );
-	  } else if ( val == 0 ) {
-	    SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 0, 128, 0 ) );
-	  } else if ( val == 2 ) {
-	    SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 255, 0, 0 ) );
-	  } else if ( val == 3 ) {
-	    SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 0, 0, 255 ) );
-	  }
-	}
-        
+        constexpr auto columnsPerDegree = xRes / 90;
+        auto column = 0;
+
+        for (int d = -45; d < 45; ++d) {
+
+            float ray = mGameSnapshot.mCurrentScan[ d + 45 ].mCachedDistance;
+            int distance = 2 * (40 * Q_rsqrt(ray)) * yRes / 2 / 40;
+            ray = sqrt( ray );
+            float sin_a = sin( wrap360( mGameSnapshot.mAngle + d) * ( 3.14159f / 180.0f) );
+            float cos_a = cos( wrap360( mGameSnapshot.mAngle + d) * ( 3.14159f / 180.0f) );
+            float hueX =  mGameSnapshot.mCamera.mX + ( ray * ( sin_a ) );
+            float hueZ = mGameSnapshot.mCamera.mY + ( ray * ( cos_a ) );
+
+            int cellX = hueX;
+            int cellZ = hueZ;
+
+            int dx = ( hueX - cellX ) * 32;
+            int dz = ( hueZ - cellZ ) * 32;
+
+            int columnHeight = distance;
+
+            for ( int y = 0; y < columnHeight; ++y ) {
+
+                int v = ( texture->getHeight() * y) / columnHeight;
+                int ux = (texture->getWidth() * dx) / 40;
+                int uz = (texture->getWidth() * dz) / 40;
+                int pixel = texture->getPixelData()[ ( texture->getWidth() * v ) + ((ux + uz ) % texture->getWidth()) ];
+
+                rect = SDL_Rect{static_cast<Sint16 >(column),
+                                static_cast<Sint16 >(yRes / 2 - (distance / 2) + y ),
+                                static_cast<Uint16 >(columnsPerDegree),
+                                static_cast<Uint16 >(1)};
+
+                SDL_FillRect(video, &rect, SDL_MapRGB(video->format, pixel & 0xFF000000 >> 8, pixel & 0x00FF0000 >> 4, pixel & 0x0000FF ) );
+            }
+
+            column += columnsPerDegree;
+        }
+
+
 
         SDL_Flip(video);
     }

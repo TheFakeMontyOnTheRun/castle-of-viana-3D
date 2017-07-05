@@ -6,10 +6,12 @@
 #define BLANKSLATE_CGAMESNAPSHOT_H
 
 namespace odb {
-    class CGameSnapshot {
+
+  class CGameSnapshot {
     public:
-        IntGameMap state;
-	std::vector< std::pair<int, int>> visited;
+    RayCollision mCurrentScan[ 90 ];
+    Vec2f mCamera = {0, 0};
+    float mAngle = 0;
     };
 }
 
