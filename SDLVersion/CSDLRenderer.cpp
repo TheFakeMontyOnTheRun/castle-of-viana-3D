@@ -84,6 +84,20 @@ namespace odb {
         }
     }
 
+    void CRenderer::fill( int x1, int y1, int w, int h, std::array<int,4> colour ) {
+        SDL_Rect rect;
+        rect.x = x1;
+        rect.y = y1;
+        rect.w = w;
+        rect.h = h;
+
+        SDL_FillRect(video, &rect, SDL_MapRGB(video->format, colour[ 1 ], colour[ 2 ], colour[ 3 ] ) );
+    }
+
+    void CRenderer::flip() {
+        SDL_Flip(video);
+    }
+
     void CRenderer::render( long ms ) {
 
         //TODO: move into  constant
@@ -92,14 +106,8 @@ namespace odb {
         //TODO: move into  constant
         const static Vec2f mapSize = { 40, 40 };
 
-
-        SDL_Rect rect;
-
-        rect = { 0, 0, xRes, yRes };
-        SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 96, 96, 96 ) );
-
-        rect = { 0, yRes / 2, xRes, yRes / 2};
-        SDL_FillRect( video, &rect, SDL_MapRGB( video->format, 192, 192, 192 ) );
+        fill( 0, 0, xRes, yRes, {0, 96, 96, 96} );
+        fill( 0, yRes / 2, xRes, yRes / 2, {0, 192, 192, 192} );
 
 
         constexpr auto columnsPerDegree = xRes / 90;
@@ -127,12 +135,12 @@ namespace odb {
                 int uz = (texture->getWidth() * dz) / mapSize.mY;
                 int pixel = texture->getPixelData()[ ( texture->getWidth() * v ) + ((ux + uz ) % texture->getWidth()) ];
 
-                rect = SDL_Rect{static_cast<Sint16 >(column),
-                                static_cast<Sint16 >(yRes / 2 - (distance / 2) + y ),
-                                static_cast<Uint16 >(columnsPerDegree),
-                                static_cast<Uint16 >(1)};
-
-                SDL_FillRect(video, &rect, SDL_MapRGB(video->format, pixel & 0xFF000000 >> 8, pixel & 0x00FF0000 >> 4, pixel & 0x0000FF ) );
+                fill( column,
+                      (yRes / 2 - (distance / 2) + y ),
+                      (columnsPerDegree),
+                      1,
+                      {0 , pixel & 0xFF000000 >> 8, pixel & 0x00FF0000 >> 4, pixel & 0x0000FF }
+                );
             }
 
             column += columnsPerDegree;
@@ -140,6 +148,6 @@ namespace odb {
 
 
 
-        SDL_Flip(video);
+        flip();
     }
 }
