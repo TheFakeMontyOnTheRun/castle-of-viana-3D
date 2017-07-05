@@ -85,6 +85,14 @@ namespace odb {
     }
 
     void CRenderer::render( long ms ) {
+
+        //TODO: move into  constant
+        const static Vec2f blockSize = { 32, 32 };
+
+        //TODO: move into  constant
+        const static Vec2f mapSize = { 40, 40 };
+
+
         SDL_Rect rect;
 
         rect = { 0, 0, xRes, yRes };
@@ -98,27 +106,25 @@ namespace odb {
         auto column = 0;
 
         for (int d = -45; d < 45; ++d) {
-
-            float ray = mGameSnapshot.mCurrentScan[ d + 45 ].mCachedDistance;
+            auto rayCollision = mGameSnapshot.mCurrentScan[ d + 45 ];
+            float ray = rayCollision .mCachedDistance;
             int distance = (yRes / ray);
-            float sin_a = sin( wrap360( mGameSnapshot.mAngle + d) * ( 3.14159f / 180.0f) );
-            float cos_a = cos( wrap360( mGameSnapshot.mAngle + d) * ( 3.14159f / 180.0f) );
-            float hueX =  mGameSnapshot.mCamera.mX + ( ray * ( sin_a ) );
-            float hueZ = mGameSnapshot.mCamera.mY + ( ray * ( cos_a ) );
+            float hueX =  rayCollision.mCollisionPoint.mX;
+            float hueZ = rayCollision.mCollisionPoint.mY;
 
             int cellX = hueX;
             int cellZ = hueZ;
 
-            int dx = ( hueX - cellX ) * 32;
-            int dz = ( hueZ - cellZ ) * 32;
+            int dx = ( hueX - cellX ) * blockSize.mX;
+            int dz = ( hueZ - cellZ ) * blockSize.mY;
 
             int columnHeight = distance;
 
             for ( int y = 0; y < columnHeight; ++y ) {
 
                 int v = ( texture->getHeight() * y) / columnHeight;
-                int ux = (texture->getWidth() * dx) / 40;
-                int uz = (texture->getWidth() * dz) / 40;
+                int ux = (texture->getWidth() * dx) / mapSize.mX;
+                int uz = (texture->getWidth() * dz) / mapSize.mY;
                 int pixel = texture->getPixelData()[ ( texture->getWidth() * v ) + ((ux + uz ) % texture->getWidth()) ];
 
                 rect = SDL_Rect{static_cast<Sint16 >(column),

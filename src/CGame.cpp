@@ -33,6 +33,7 @@ namespace odb {
 
         RayCollision collision;
         collision.mCachedDistance = sqrt(( dx * dx ) + ( dy * dy ));
+        collision.mCollisionPoint = { rx, ry };
         return collision;
     }
 
