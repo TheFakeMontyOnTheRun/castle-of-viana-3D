@@ -34,5 +34,9 @@ namespace odb {
 
     float Q_rsqrt( float number );
     int wrap360(int i);
+
+    const int xRes = 320;
+    const int yRes = 200;
+
 }
 #endif //BLANKSLATE_COMMON_H

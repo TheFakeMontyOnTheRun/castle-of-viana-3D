@@ -62,10 +62,11 @@ namespace odb {
         int xSize;
         int ySize;
         int components;
-        auto image = stbi_load_from_memory((const stbi_uc *) buffer.data(), buffer.size(), &xSize, &ySize, &components, 0);
+        auto image = stbi_load_from_memory((const stbi_uc *) buffer.data(), buffer.size(), &xSize, &ySize, &components, 4);
         auto rawData = new int[xSize * ySize];
-        std::memcpy( rawData, image, xSize * ySize * 4 );
+        std::memcpy( rawData, image, xSize * ySize * sizeof( int ) );
         stbi_image_free(image);
+
 
         return (std::make_shared<odb::NativeBitmap>(path, xSize, ySize, rawData));
 

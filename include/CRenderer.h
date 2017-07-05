@@ -12,7 +12,7 @@ namespace odb {
         CControlCallback mOnKeyPressedCallback;
         CControlCallback mOnKeyReleasedCallback;
         CGameSnapshot mGameSnapshot;
-        void fill( int x1, int y1, int w, int h, std::array<int,4> colour );
+        void fill( int x1, int y1, int w, int h, std::array<uint8_t,4> colour );
         void flip();
      public:
         CRenderer( CControlCallback keyPressedCallback, CControlCallback keyReleasedCallback );
