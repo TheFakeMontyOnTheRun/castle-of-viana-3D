@@ -142,12 +142,22 @@ namespace odb {
             }
 
             if (command == ECommand::kUp) {
-                mCamera.mX += std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
-                mCamera.mY += std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                auto newX = mCamera.mX + std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                auto newY = mCamera.mY + std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
+
+                if (mMap[ newY ][ newX ] == 0 ) {
+                    mCamera.mX = newX;
+                    mCamera.mY = newY;
+                }
 
             } else if (command == ECommand::kDown) {
-                mCamera.mX -= std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
-                mCamera.mY -= std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                auto newX = mCamera.mX - std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                auto newY = mCamera.mY - std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
+
+                if (mMap[ newY ][ newX ] == 0 ) {
+                    mCamera.mX = newX;
+                    mCamera.mY = newY;
+                }
             }
         };
     }
