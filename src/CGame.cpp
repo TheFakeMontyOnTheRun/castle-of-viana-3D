@@ -34,7 +34,7 @@ namespace odb {
         RayCollision collision;
         collision.mCachedDistance = sqrt((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f );
         collision.mCollisionPoint = { rx, ry };
-        collision.mHeight = 1;//std::max( 1, mMap[ ry ][ rx ] );
+        collision.mHeight = 1;
         return collision;
     }
 
@@ -53,13 +53,13 @@ namespace odb {
         mMap = std::array<std::array<int, 40>, 40>{
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                 std::array<int, 40>{0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                std::array<int, 40>{0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                std::array<int, 40>{0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                std::array<int, 40>{0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0},
-                std::array<int, 40>{0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
-                std::array<int, 40>{0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
-                std::array<int, 40>{0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
-                std::array<int, 40>{0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
+                std::array<int, 40>{0,0,2,0,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                std::array<int, 40>{0,0,1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                std::array<int, 40>{0,0,2,0,0,0,0,0,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0},
+                std::array<int, 40>{0,0,0,0,1,0,0,0,4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
+                std::array<int, 40>{0,0,0,1,1,1,0,0,3,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
+                std::array<int, 40>{0,0,0,0,1,0,0,0,2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
+                std::array<int, 40>{0,0,3,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -111,6 +111,21 @@ namespace odb {
             mCamera.mY = 0;
         }
 
+        auto newX = mCamera.mX + mSpeed.mX;
+        auto newY = mCamera.mY + mSpeed.mY;
+
+        if (mMap[ newY ][ newX ] == 0 ) {
+            mCamera.mX = newX;
+            mCamera.mY = newY;
+        } else {
+            mSpeed = { 0, 0};
+        }
+
+        mAngle += mAngularSpeed;
+
+        mSpeed.mX = mSpeed.mX / 2.0f;
+        mSpeed.mY = mSpeed.mY / 2.0f;
+        mAngularSpeed = mAngularSpeed / 2.0f;
     }
 
     CGameSnapshot CGame::getGameSnapshot() {
@@ -129,11 +144,11 @@ namespace odb {
     CControlCallback CGame::getKeyPressedCallback() {
         return [&](ECommand command) {
             if (command == ECommand::kLeft) {
-                mAngle -=5;
+                mAngularSpeed = -5;
             }
 
             if (command == ECommand::kRight) {
-                mAngle +=5;
+                mAngularSpeed = 5;
             }
 
             mAngle = static_cast<int>(mAngle) % 360;
@@ -143,22 +158,12 @@ namespace odb {
             }
 
             if (command == ECommand::kUp) {
-                auto newX = mCamera.mX + std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
-                auto newY = mCamera.mY + std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
-
-                if (mMap[ newY ][ newX ] == 0 ) {
-                    mCamera.mX = newX;
-                    mCamera.mY = newY;
-                }
+                mSpeed.mX = std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mSpeed.mY = std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
 
             } else if (command == ECommand::kDown) {
-                auto newX = mCamera.mX - std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
-                auto newY = mCamera.mY - std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
-
-                if (mMap[ newY ][ newX ] == 0 ) {
-                    mCamera.mX = newX;
-                    mCamera.mY = newY;
-                }
+                mSpeed.mX = -std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mSpeed.mY = -std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
             }
         };
     }

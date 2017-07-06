@@ -24,7 +24,7 @@ namespace odb {
     public:
         float mCachedDistance = 0;
         Vec2f mCollisionPoint = {0,0};
-        float mHeight = 0;
+        int mHeight = 0;
     };
 
     using MapLine = std::array<int, 20>;
