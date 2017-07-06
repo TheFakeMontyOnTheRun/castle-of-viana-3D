@@ -32,7 +32,7 @@ namespace odb {
         float dy = ry - ry0;
 
         RayCollision collision;
-        collision.mCachedDistance = sqrt(( dx * dx ) + ( dy * dy ));
+        collision.mCachedDistance = sqrt((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f );
         collision.mCollisionPoint = { rx, ry };
         return collision;
     }
@@ -43,8 +43,8 @@ namespace odb {
         mCamera.mX = mCamera.mY = 1;
 
         for ( int c = 0; c < 360; ++c ) {
-            auto sin_a = (std::sin((c * 3.14159f) / 180.0f)) / 128.0f;
-            auto cos_a = (std::cos((c * 3.14159f) / 180.0f)) / 128.0f;
+            auto sin_a = (std::sin((c * 3.14159f) / 180.0f)) / 16.0f;
+            auto cos_a = (std::cos((c * 3.14159f) / 180.0f)) / 16.0f;
             sines[ c ] = sin_a;
             cossines[ c ] = cos_a;
         }
