@@ -54,7 +54,11 @@ namespace odb {
       constexpr auto columnsPerDegree = (xRes / 90)+1;
       auto column = 0;
 
-      for (int d = -45; d <= 45; ++d) {
+        const int textureWidth = texture->getWidth();
+        const int textureHeight = texture->getHeight();
+        const int* textureData = texture->getPixelData();
+
+      for (int d = -45; d < 45; ++d) {
           auto rayCollision = mGameSnapshot.mCurrentScan[ d + 45 ];
           float ray = rayCollision.mCachedDistance;
           int distance = (yRes / ray);
@@ -71,10 +75,11 @@ namespace odb {
 
           for ( int y = 0; y <= columnHeight; ++y ) {
 
-              int v = ( texture->getHeight() * y) / columnHeight;
-              int ux = (texture->getWidth() * dx) / mapSize.mX;
-              int uz = (texture->getWidth() * dz) / mapSize.mY;
-              unsigned int pixel = texture->getPixelData()[ ( texture->getWidth() * v ) + ((ux + uz ) % texture->getWidth()) ];
+              int v = ( textureHeight * y) / columnHeight;
+              int ux = (textureWidth * dx) / mapSize.mX;
+              int uz = (textureWidth * dz) / mapSize.mY;
+
+              unsigned int pixel = textureData[ ( textureWidth * v ) + ((ux + uz ) % textureWidth) ];
 
               fill( column,
                     (yRes / 2 - (distance / 2) + y ),
