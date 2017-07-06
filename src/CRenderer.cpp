@@ -73,16 +73,16 @@ namespace odb {
 
           int columnHeight = distance;
 
-          for ( int y = 0; y <= columnHeight; ++y ) {
+          for ( int y = 0; y <= columnHeight * ( rayCollision.mHeight + 1 ); ++y ) {
 
-              int v = ( textureHeight * y) / columnHeight;
+              int v = (( textureHeight * y) / columnHeight ) % textureHeight;
               int ux = (textureWidth * dx) / mapSize.mX;
               int uz = (textureWidth * dz) / mapSize.mY;
 
               unsigned int pixel = textureData[ ( textureWidth * v ) + ((ux + uz ) % textureWidth) ];
 
               fill( column,
-                    (yRes / 2 - (distance / 2) + y ),
+                    (yRes / 2 - (columnHeight * rayCollision.mHeight) + y ),
                     (columnsPerDegree),
                     1,
                     {0 , (pixel & 0xFF) >> 0, (pixel & 0x00FF00) >> 8, (pixel & 0xFF0000) >> 16 }

@@ -59,14 +59,14 @@ namespace odb {
       pixel += (colour[ 3 ] & 0xFF) << 16;
       
       for ( int y = _y0; y < _y1; ++y ) {
-	for ( int x = _x0; x < _x1; ++x ) {
+	    for ( int x = _x0; x < _x1; ++x ) {
 
-	  if ( x < 0 || x >= 320 || y < 0 || y >= 200 ) {
-	    continue;
-	  }
+	        if ( x < 0 || x >= 320 || y < 0 || y >= 200 ) {
+	            continue;
+	        }
 	  
-	  mBuffer[ (320 * y ) + x ] = pixel;
-	}
+	        mBuffer[ (320 * y ) + x ] = pixel;
+	    }
       }
     };
   
