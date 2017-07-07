@@ -30,8 +30,12 @@
 #include "LoadPNG.h"
 
 namespace odb {
-
-    auto texture = loadPNG("res/tile0.png");
+    std::vector<std::shared_ptr<odb::NativeBitmap>> textures {
+            loadPNG("res/tile0.png"),
+            loadPNG("res/tile0.png"),
+            loadPNG("res/tile1.png"),
+            loadPNG("res/bricks0.png"),
+    };
 
     void CRenderer::setSnapshot( const CGameSnapshot& snapshot ) {
         this->mGameSnapshot = snapshot;
@@ -39,7 +43,6 @@ namespace odb {
 
 
     void CRenderer::render( long ms ) {
-
 
       //TODO: move into  constant
       const static Vec2f blockSize = { 32, 32 };
@@ -54,12 +57,23 @@ namespace odb {
       constexpr auto columnsPerDegree = (xRes / 90)+1;
       auto column = 0;
 
+        auto texture = textures[ 1 ];
+
         const int textureWidth = texture->getWidth();
         const int textureHeight = texture->getHeight();
-        const int* textureData = texture->getPixelData();
+
 
       for (int d = -45; d < 45; ++d) {
+          int index = 1;
           auto rayCollision = mGameSnapshot.mCurrentScan[ d + 45 ];
+
+          if ( rayCollision.mElement > 0 && rayCollision.mElement < textures.size()  ) {
+              index = rayCollision.mElement;
+          }
+
+
+          const int* textureData = textures[ index ]->getPixelData();
+
           float ray = rayCollision.mCachedDistance;
           int distance = (yRes / ray);
           float hueX =  rayCollision.mCollisionPoint.mX;
@@ -85,7 +99,11 @@ namespace odb {
                     (yRes / 2 - (columnHeight * rayCollision.mHeight) + y ),
                     (columnsPerDegree),
                     1,
-                    {0 , (pixel & 0xFF) >> 0, (pixel & 0x00FF00) >> 8, (pixel & 0xFF0000) >> 16 }
+                    {0 ,
+                     static_cast<unsigned char>((pixel & 0xFF) >> 0),
+                     static_cast<unsigned char>((pixel & 0x00FF00) >> 8),
+                     static_cast<unsigned char>((pixel & 0xFF0000) >> 16)
+                    }
               );
           }
 
