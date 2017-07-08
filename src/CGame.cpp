@@ -96,26 +96,27 @@ namespace odb {
     }
 
     void CGame::tick( long ms ) {
-        if (mCamera.mX >= 40) {
-            mCamera.mX = 39;
-        }
-
-        if (mCamera.mY >= 40) {
-            mCamera.mY = 39;
-        }
-
-        if (mCamera.mX < 0) {
-            mCamera.mX = 0;
-        }
-
-        if (mCamera.mY < 0) {
-            mCamera.mY = 0;
-        }
 
         auto newX = mCamera.mX + mSpeed.mX;
         auto newY = mCamera.mY + mSpeed.mY;
 
-        if (mMap[ newY ][ newX ] == 0 ) {
+        if (newX >= 40) {
+            newX = 39;
+        }
+
+        if (newY >= 40) {
+            newY = 39;
+        }
+
+        if (newX < 0) {
+            newX = 0;
+        }
+
+        if (newY < 0) {
+            newY = 0;
+        }
+
+        if (mMap[newY ][ newX ] == 0 ) {
             mCamera.mX = newX;
             mCamera.mY = newY;
         } else {
