@@ -42,6 +42,37 @@ namespace odb {
     }
 
 
+    void CRenderer::draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h ) {
+        float stepX = static_cast<float>(bitmap->getWidth()) / static_cast<float>(w);
+        float stepY = static_cast<float>(bitmap->getHeight()) / static_cast<float>(h);
+        int *pixelData = bitmap->getPixelData();
+        int bWidth = bitmap->getWidth();
+        float px = 0;
+        float py = 0;
+
+        int fillDX = std::max( 1, static_cast<int>(stepX) );
+        int fillDY = std::max( 1, static_cast<int>(stepY) );
+
+        for ( int y = y0; y < ( y0 + h ); ++y ) {
+            px = 0;
+            for ( int x = x0; x < ( x0 + w ); ++x ) {
+                int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
+
+                if ( ( ( pixel & 0xFF000000 ) >> 24 ) > 0 ) {
+                    fill( x, y, fillDX, fillDY,
+                          {0 ,
+                           static_cast<unsigned char>((pixel & 0xFF) >> 0),
+                           static_cast<unsigned char>((pixel & 0x00FF00) >> 8),
+                           static_cast<unsigned char>((pixel & 0xFF0000) >> 16)
+                          }
+                    );
+                }
+                px += stepX;
+            }
+            py += stepY;
+        }
+    }
+
     void CRenderer::render( long ms ) {
 
       //TODO: move into  constant
