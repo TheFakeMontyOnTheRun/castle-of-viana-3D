@@ -1,8 +1,7 @@
 CXX = em++
-CXXFLAGS = -g  --preload-file res --use-preload-plugins -Iinclude -std=c++14
+CXXFLAGS = -g  --preload-file res --use-preload-plugins -Iinclude -std=c++14 -Istb
 
-OBJS = src/CGame.o src/CGameSnapshot.o SDLVersion/CSDLRenderer.o SDLVersion/main.o
-
+OBJS = src/CGame.o  src/CGameSnapshot.o SDLVersion/main.o SDLVersion/CSDLRenderer.o src/CRenderer.o src/Common.o src/NativeBitmap.o src/LoadPNG.o
 
 TARGET = game.html
 
