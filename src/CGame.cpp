@@ -32,7 +32,7 @@ namespace odb {
         float dy = ry - ry0;
 
         RayCollision collision;
-        collision.mCachedDistance = sqrt((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f );
+        collision.mSquaredDistance = ((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f );
         collision.mCollisionPoint = { rx, ry };
         collision.mHeight = 1;
         collision.mElement = mMap[ ry ][ rx ];

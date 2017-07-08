@@ -74,8 +74,7 @@ namespace odb {
 
           const int* textureData = textures[ index ]->getPixelData();
 
-          float ray = rayCollision.mCachedDistance;
-          int distance = (yRes / ray);
+          int distance = (yRes * Q_rsqrt(rayCollision.mSquaredDistance));
           float hueX =  rayCollision.mCollisionPoint.mX;
           float hueZ = rayCollision.mCollisionPoint.mY;
 

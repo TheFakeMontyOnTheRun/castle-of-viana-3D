@@ -22,7 +22,7 @@ namespace odb {
 
     class RayCollision {
     public:
-        float mCachedDistance = 0;
+        float mSquaredDistance = 0;
         Vec2f mCollisionPoint = {0,0};
         int mHeight = 0;
         int mElement = 0;
