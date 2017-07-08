@@ -3,13 +3,14 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-
+#include <algorithm>
 #include "Common.h"
 #include "CGameSnapshot.h"
 #include "CGame.h"
 
 namespace odb {
-
+std::vector<std::tuple<int, int>> visibleCharacters;
+std::vector<std::pair<int, int>> visitedCharacters;
     RayCollision CGame::castRay(int offset) {
 
         const auto limit = 40;
@@ -19,19 +20,40 @@ namespace odb {
 
         float rx = rx0;
         float ry = ry0;
-
+        RayCollision collision;
         int angle = wrap360( mAngle + offset);
 
         do {
             rx += sines[ angle ];
             ry += cossines[ angle ];
-        } while ( ( rx > 0 && rx < limit && ry > 0 && ry < limit ) && ( mMap[ ry ][ rx ] == 0 ));
+
+            if ( mMap[ (ry) ][ (rx) ] < 0 ) {
+                float dx = rx - rx0;
+                float dy = ry - ry0;
+
+                auto pos = std::pair<int, int>{
+                        static_cast<int>(rx),
+                        static_cast<int>(ry)
+                };
+
+                auto found = std::find( std::begin( visitedCharacters), std::end(visitedCharacters), pos );
+
+                if ( found == std::end( visitedCharacters ) ) {
+                    visitedCharacters.push_back( pos );
+
+                    visibleCharacters.emplace_back(static_cast<int>(offset), static_cast<int>(((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f )));
+                }
+
+
+            }
+
+        } while ( ( rx > 0 && rx < limit && ry > 0 && ry < limit ) && ( mMap[ ry ][ rx ] <= 0 ));
 
 
         float dx = rx - rx0;
         float dy = ry - ry0;
 
-        RayCollision collision;
+
         collision.mSquaredDistance = ((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f );
         collision.mCollisionPoint = { rx, ry };
         collision.mHeight = 1;
@@ -54,11 +76,11 @@ namespace odb {
         mMap = std::array<std::array<int, 40>, 40>{
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                 std::array<int, 40>{0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-                std::array<int, 40>{0,0,2,0,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                std::array<int, 40>{0,0,2,0, 0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                 std::array<int, 40>{0,0,3,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                 std::array<int, 40>{0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0},
                 std::array<int, 40>{0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
-                std::array<int, 40>{0,0,0,1,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
+                std::array<int, 40>{0,-4,0,1,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
@@ -132,11 +154,13 @@ namespace odb {
 
     CGameSnapshot CGame::getGameSnapshot() {
         CGameSnapshot snapshot;
+        visibleCharacters.clear();
+        visitedCharacters.clear();
 
         for (int d = -45; d < 45; ++d) {
             snapshot.mCurrentScan[ d + 45 ] = castRay(d);
         }
-
+        snapshot.mVisibleCharacters = visibleCharacters;
         snapshot.mAngle = mAngle;
         snapshot.mCamera = mCamera;
 

@@ -1,5 +1,6 @@
 #include <functional>
 #include <memory>
+#include <vector>
 #include <iostream>
 #include "Common.h"
 #include "CGameSnapshot.h"
