@@ -5,10 +5,8 @@ namespace odb {
 
     class CGame {
     private:
-      Vec2f mCamera = { 0, 0 };
-        Vec2f mSpeed = {0,0};
-        float mAngle = 0;
-        float mAngularSpeed = 0;
+
+      CActor mCamera;
         float sines[ 360 ];
         float cossines[ 360 ];
         std::array<std::array< int, 40>, 40 > mMap;

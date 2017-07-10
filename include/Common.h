@@ -28,6 +28,14 @@ namespace odb {
         int mElement = 0;
     };
 
+    class CActor {
+    public:
+        Vec2f mPosition = { 0, 0 };
+        Vec2f mSpeed = { 0, 0 };
+        float mAngularSpeed = 0;
+        float mAngle = 0;
+    };
+
     using MapLine = std::array<int, 20>;
     using IntGameMap = std::array<MapLine, 20>;
 

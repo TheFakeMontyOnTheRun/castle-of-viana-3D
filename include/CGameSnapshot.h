@@ -11,8 +11,7 @@ namespace odb {
     public:
       std::vector<std::tuple<int, int>> mVisibleCharacters;
     RayCollision mCurrentScan[ 90 ];
-    Vec2f mCamera = {0, 0};
-    float mAngle = 0;
+    CActor mCamera;
     };
 }
 

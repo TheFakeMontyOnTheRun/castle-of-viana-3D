@@ -15,13 +15,13 @@ std::vector<std::pair<int, int>> visitedCharacters;
 
         const auto limit = 40;
 
-        float rx0 = mCamera.mX;
-        float ry0 = mCamera.mY;
+        float rx0 = mCamera.mPosition.mX;
+        float ry0 = mCamera.mPosition.mY;
 
         float rx = rx0;
         float ry = ry0;
         RayCollision collision;
-        int angle = wrap360( mAngle + offset);
+        int angle = wrap360( mCamera.mAngle + offset);
 
         do {
             rx += sines[ angle ];
@@ -64,7 +64,7 @@ std::vector<std::pair<int, int>> visitedCharacters;
 
 
     CGame::CGame() {
-        mCamera.mX = mCamera.mY = 1;
+        mCamera.mPosition.mX = mCamera.mPosition.mY = 1;
 
         for ( int c = 0; c < 360; ++c ) {
             auto sin_a = (std::sin((c * 3.14159f) / 180.0f)) / 16.0f;
@@ -119,8 +119,8 @@ std::vector<std::pair<int, int>> visitedCharacters;
 
     void CGame::tick( long ms ) {
 
-        auto newX = mCamera.mX + mSpeed.mX;
-        auto newY = mCamera.mY + mSpeed.mY;
+        auto newX = mCamera.mPosition.mX + mCamera.mSpeed.mX;
+        auto newY = mCamera.mPosition.mY + mCamera.mSpeed.mY;
 
         if (newX >= 40) {
             newX = 39;
@@ -139,17 +139,17 @@ std::vector<std::pair<int, int>> visitedCharacters;
         }
 
         if (mMap[newY ][ newX ] == 0 ) {
-            mCamera.mX = newX;
-            mCamera.mY = newY;
+            mCamera.mPosition.mX = newX;
+            mCamera.mPosition.mY = newY;
         } else {
-            mSpeed = { 0, 0};
+            mCamera.mSpeed = { 0, 0};
         }
 
-        mAngle += mAngularSpeed;
+        mCamera.mAngle += mCamera.mAngularSpeed;
 
-        mSpeed.mX = mSpeed.mX / 2.0f;
-        mSpeed.mY = mSpeed.mY / 2.0f;
-        mAngularSpeed = mAngularSpeed / 2.0f;
+        mCamera.mSpeed.mX = mCamera.mSpeed.mX / 2.0f;
+        mCamera.mSpeed.mY = mCamera.mSpeed.mY / 2.0f;
+        mCamera.mAngularSpeed = mCamera.mAngularSpeed / 2.0f;
     }
 
     CGameSnapshot CGame::getGameSnapshot() {
@@ -161,7 +161,6 @@ std::vector<std::pair<int, int>> visitedCharacters;
             snapshot.mCurrentScan[ d + 45 ] = castRay(d);
         }
         snapshot.mVisibleCharacters = visibleCharacters;
-        snapshot.mAngle = mAngle;
         snapshot.mCamera = mCamera;
 
         return snapshot;
@@ -170,26 +169,26 @@ std::vector<std::pair<int, int>> visitedCharacters;
     CControlCallback CGame::getKeyPressedCallback() {
         return [&](ECommand command) {
             if (command == ECommand::kLeft) {
-                mAngularSpeed = -5;
+                mCamera.mAngularSpeed = -5;
             }
 
             if (command == ECommand::kRight) {
-                mAngularSpeed = 5;
+                mCamera.mAngularSpeed = 5;
             }
 
-            mAngle = static_cast<int>(mAngle) % 360;
+            mCamera.mAngle = static_cast<int>(mCamera.mAngle) % 360;
 
-            while ( mAngle < 0 ) {
-                mAngle += 360;
+            while ( mCamera.mAngle < 0 ) {
+                mCamera.mAngle += 360;
             }
 
             if (command == ECommand::kUp) {
-                mSpeed.mX = std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
-                mSpeed.mY = std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera.mSpeed.mX = std::sin((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera.mSpeed.mY = std::cos((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
 
             } else if (command == ECommand::kDown) {
-                mSpeed.mX = -std::sin((mAngle * 3.14159f) / 180.0f) * 0.75f;
-                mSpeed.mY = -std::cos((mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera.mSpeed.mX = -std::sin((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera.mSpeed.mY = -std::cos((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
             }
         };
     }
