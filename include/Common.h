@@ -14,6 +14,11 @@ namespace odb {
         kFire2
     };
 
+    enum class EActorType {
+        kEnemy,
+        kFireball
+    };
+
     class Vec2f {
     public:
       float mX = 0;
@@ -34,6 +39,7 @@ namespace odb {
         Vec2f mSpeed = { 0, 0 };
         float mAngularSpeed = 0;
         float mAngle = 0;
+        EActorType mType = EActorType::kEnemy;
     };
 
     using MapLine = std::array<int, 20>;

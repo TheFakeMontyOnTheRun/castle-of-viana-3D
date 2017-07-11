@@ -1,5 +1,6 @@
 #include <functional>
 #include <array>
+#include <memory>
 #include <vector>
 #include <iostream>
 #include <cmath>
@@ -80,7 +81,7 @@ std::vector<std::pair<int, int>> visitedCharacters;
                 std::array<int, 40>{0,0,3,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
                 std::array<int, 40>{0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0},
                 std::array<int, 40>{0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
-                std::array<int, 40>{0,-4,0,1,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
+                std::array<int, 40>{0,0,0,1,1,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
@@ -115,6 +116,12 @@ std::vector<std::pair<int, int>> visitedCharacters;
                 std::array<int, 40>{0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
         };
+
+
+        //1,6
+        auto foe = std::make_shared<CActor>();
+        foe->mPosition = {1,8};
+        mActors.push_back(foe);
     }
 
     void CGame::tick( long ms ) {
@@ -150,6 +157,21 @@ std::vector<std::pair<int, int>> visitedCharacters;
         mCamera.mSpeed.mX = mCamera.mSpeed.mX / 2.0f;
         mCamera.mSpeed.mY = mCamera.mSpeed.mY / 2.0f;
         mCamera.mAngularSpeed = mCamera.mAngularSpeed / 2.0f;
+
+
+        for ( int y = 0; y < 40; ++y ) {
+            for ( int x = 0; x < 40; ++x ) {
+                if ( mMap[ y ][ x ] < 0 ) {
+                    mMap[ y ][ x ] = 0;
+                }
+            }
+        }
+
+        for ( const auto& actor : mActors ) {
+            int x = actor->mPosition.mX;
+            int y = actor->mPosition.mY;
+            mMap[ y ][ x ] = ( actor->mType == EActorType::kEnemy )? -4 : -5;
+        }
     }
 
     CGameSnapshot CGame::getGameSnapshot() {
@@ -166,8 +188,17 @@ std::vector<std::pair<int, int>> visitedCharacters;
         return snapshot;
     }
 
+    void CGame::spawnFireball(int x, int y, int angle) {
+        mMap[ y ][ x ] = -5;
+    }
+
     CControlCallback CGame::getKeyPressedCallback() {
         return [&](ECommand command) {
+
+            if (command == ECommand::kFire1) {
+                spawnFireball( round(std::sin((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f), round(std::cos((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f), mCamera.mAngle );
+            }
+
             if (command == ECommand::kLeft) {
                 mCamera.mAngularSpeed = -5;
             }
