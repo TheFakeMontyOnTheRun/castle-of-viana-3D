@@ -10,25 +10,25 @@
 #include "CGame.h"
 
 namespace odb {
-std::vector<std::tuple<int, int>> visibleCharacters;
+std::vector<std::tuple<int, int, int>> visibleCharacters;
 std::vector<std::pair<int, int>> visitedCharacters;
     RayCollision CGame::castRay(int offset) {
 
         const auto limit = 40;
 
-        float rx0 = mCamera.mPosition.mX;
-        float ry0 = mCamera.mPosition.mY;
+        float rx0 = mCamera->mPosition.mX;
+        float ry0 = mCamera->mPosition.mY;
 
         float rx = rx0;
         float ry = ry0;
         RayCollision collision;
-        int angle = wrap360( mCamera.mAngle + offset);
+        int angle = wrap360( mCamera->mAngle + offset);
 
         do {
             rx += sines[ angle ];
             ry += cossines[ angle ];
-
-            if ( mMap[ (ry) ][ (rx) ] < 0 ) {
+            auto type = mMap[ (ry) ][ (rx) ];
+            if ( type < 0 ) {
                 float dx = rx - rx0;
                 float dy = ry - ry0;
 
@@ -42,7 +42,7 @@ std::vector<std::pair<int, int>> visitedCharacters;
                 if ( found == std::end( visitedCharacters ) ) {
                     visitedCharacters.push_back( pos );
 
-                    visibleCharacters.emplace_back(static_cast<int>(offset), static_cast<int>(((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f )));
+                    visibleCharacters.emplace_back(static_cast<int>(offset), static_cast<int>(((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f )), type );
                 }
 
 
@@ -65,7 +65,6 @@ std::vector<std::pair<int, int>> visitedCharacters;
 
 
     CGame::CGame() {
-        mCamera.mPosition.mX = mCamera.mPosition.mY = 1;
 
         for ( int c = 0; c < 360; ++c ) {
             auto sin_a = (std::sin((c * 3.14159f) / 180.0f)) / 16.0f;
@@ -117,47 +116,17 @@ std::vector<std::pair<int, int>> visitedCharacters;
                 std::array<int, 40>{0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0},
         };
 
+        mCamera = std::make_shared<CActor>();
+        mCamera->mPosition = {1,1};
+        mActors.push_back(mCamera);
 
-        //1,6
         auto foe = std::make_shared<CActor>();
-        foe->mPosition = {1,8};
+        foe->mPosition = {2,1};
+        foe->mSpeed.mY = 4.0f;
         mActors.push_back(foe);
     }
 
     void CGame::tick( long ms ) {
-
-        auto newX = mCamera.mPosition.mX + mCamera.mSpeed.mX;
-        auto newY = mCamera.mPosition.mY + mCamera.mSpeed.mY;
-
-        if (newX >= 40) {
-            newX = 39;
-        }
-
-        if (newY >= 40) {
-            newY = 39;
-        }
-
-        if (newX < 0) {
-            newX = 0;
-        }
-
-        if (newY < 0) {
-            newY = 0;
-        }
-
-        if (mMap[newY ][ newX ] == 0 ) {
-            mCamera.mPosition.mX = newX;
-            mCamera.mPosition.mY = newY;
-        } else {
-            mCamera.mSpeed = { 0, 0};
-        }
-
-        mCamera.mAngle += mCamera.mAngularSpeed;
-
-        mCamera.mSpeed.mX = mCamera.mSpeed.mX / 2.0f;
-        mCamera.mSpeed.mY = mCamera.mSpeed.mY / 2.0f;
-        mCamera.mAngularSpeed = mCamera.mAngularSpeed / 2.0f;
-
 
         for ( int y = 0; y < 40; ++y ) {
             for ( int x = 0; x < 40; ++x ) {
@@ -167,10 +136,45 @@ std::vector<std::pair<int, int>> visitedCharacters;
             }
         }
 
-        for ( const auto& actor : mActors ) {
-            int x = actor->mPosition.mX;
-            int y = actor->mPosition.mY;
-            mMap[ y ][ x ] = ( actor->mType == EActorType::kEnemy )? -4 : -5;
+        for ( auto& actor : mActors ) {
+
+            auto newX = actor->mPosition.mX + actor->mSpeed.mX;
+            auto newY = actor->mPosition.mY + actor->mSpeed.mY;
+
+            if (newX >= 40) {
+                newX = 39;
+            }
+
+            if (newY >= 40) {
+                newY = 39;
+            }
+
+            if (newX < 0) {
+                newX = 0;
+            }
+
+            if (newY < 0) {
+                newY = 0;
+            }
+
+            if (mMap[newY ][ newX ] == 0 ) {
+                actor->mPosition.mX = newX;
+                actor->mPosition.mY = newY;
+            } else {
+                actor->mSpeed = { 0, 0};
+            }
+
+            actor->mAngle += actor->mAngularSpeed;
+
+            if (actor->mType == EActorType::kEnemy) {
+                actor->mSpeed.mX = actor->mSpeed.mX / 2.0f;
+                actor->mSpeed.mY = actor->mSpeed.mY / 2.0f;
+                actor->mAngularSpeed = actor->mAngularSpeed / 2.0f;
+            }
+
+            if ( actor != mCamera ) {
+                mMap[newY][newX] = (actor->mType == EActorType::kEnemy) ? -4 : -5;
+            }
         }
     }
 
@@ -183,43 +187,47 @@ std::vector<std::pair<int, int>> visitedCharacters;
             snapshot.mCurrentScan[ d + 45 ] = castRay(d);
         }
         snapshot.mVisibleCharacters = visibleCharacters;
-        snapshot.mCamera = mCamera;
+        snapshot.mCamera = *mCamera;
 
         return snapshot;
     }
 
-    void CGame::spawnFireball(int x, int y, int angle) {
-        mMap[ y ][ x ] = -5;
+    void CGame::spawnFireball(int x, int y, float angle) {
+        auto foe = std::make_shared<CActor>();
+        foe->mType = EActorType::kFireball;
+        foe->mPosition = {x,y};
+        foe->mSpeed = { std::sin((angle * 3.14159f) / 180.0f), std::cos((mCamera->mAngle * 3.14159f) / 180.0f) };
+        mActors.push_back(foe);
     }
 
     CControlCallback CGame::getKeyPressedCallback() {
         return [&](ECommand command) {
 
             if (command == ECommand::kFire1) {
-                spawnFireball( round(std::sin((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f), round(std::cos((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f), mCamera.mAngle );
+                spawnFireball( round(std::sin((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f), round(std::cos((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f), mCamera->mAngle );
             }
 
             if (command == ECommand::kLeft) {
-                mCamera.mAngularSpeed = -5;
+                mCamera->mAngularSpeed = -5;
             }
 
             if (command == ECommand::kRight) {
-                mCamera.mAngularSpeed = 5;
+                mCamera->mAngularSpeed = 5;
             }
 
-            mCamera.mAngle = static_cast<int>(mCamera.mAngle) % 360;
+            mCamera->mAngle = static_cast<int>(mCamera->mAngle) % 360;
 
-            while ( mCamera.mAngle < 0 ) {
-                mCamera.mAngle += 360;
+            while ( mCamera->mAngle < 0 ) {
+                mCamera->mAngle += 360;
             }
 
             if (command == ECommand::kUp) {
-                mCamera.mSpeed.mX = std::sin((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
-                mCamera.mSpeed.mY = std::cos((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera->mSpeed.mX = std::sin((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera->mSpeed.mY = std::cos((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f;
 
             } else if (command == ECommand::kDown) {
-                mCamera.mSpeed.mX = -std::sin((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
-                mCamera.mSpeed.mY = -std::cos((mCamera.mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera->mSpeed.mX = -std::sin((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f;
+                mCamera->mSpeed.mY = -std::cos((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f;
             }
         };
     }

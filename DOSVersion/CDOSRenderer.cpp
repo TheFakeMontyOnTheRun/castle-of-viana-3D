@@ -145,6 +145,7 @@ namespace odb {
 	mOnKeyPressedCallback( ECommand::kDown );
 	break;
       case 'z':
+          mOnKeyPressedCallback( ECommand::kFire1 );
 	break;
       default:
 	break;

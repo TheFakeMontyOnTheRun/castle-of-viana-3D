@@ -37,6 +37,7 @@ namespace odb {
             loadPNG("res/tile1.png"),
             loadPNG("res/bricks0.png"),
             loadPNG("res/hero0.png"),
+            loadPNG("res/fireball.png"),
     };
 
     void CRenderer::setSnapshot( const CGameSnapshot& snapshot ) {
@@ -182,7 +183,7 @@ namespace odb {
 
                 int columnHeight = distance;
 
-                draw( textures[ 4  ],
+                draw( std::get<2>(c) == -4 ? textures[ 4  ] : textures[ 5  ],
                       column,
                       (yRes / 2 - (columnHeight * rayCollision.mHeight) ),
                       2 * columnHeight,

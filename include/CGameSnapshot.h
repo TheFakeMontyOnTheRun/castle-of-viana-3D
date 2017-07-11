@@ -9,7 +9,7 @@ namespace odb {
 
   class CGameSnapshot {
     public:
-      std::vector<std::tuple<int, int>> mVisibleCharacters;
+      std::vector<std::tuple<int, int, int>> mVisibleCharacters;
     RayCollision mCurrentScan[ 90 ];
     CActor mCamera;
     };

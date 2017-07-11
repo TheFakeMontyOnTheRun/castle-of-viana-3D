@@ -56,6 +56,10 @@ namespace odb {
 
             if ( event.type == SDL_KEYDOWN ) {
                 switch (event.key.keysym.sym) {
+                    case SDLK_SPACE:
+                        mOnKeyPressedCallback(ECommand::kFire1);
+                        break;
+
                     case SDLK_LEFT:
                         mOnKeyPressedCallback(ECommand::kLeft);
                         break;
