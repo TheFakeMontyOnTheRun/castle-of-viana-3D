@@ -185,7 +185,7 @@ namespace odb {
 
                 draw( std::get<2>(c) == -4 ? textures[ 4  ] : textures[ 5  ],
                       column,
-                      (yRes / 2 - (columnHeight * rayCollision.mHeight) ),
+                      (yRes / 2 - (columnHeight * rayCollision.mHeight) ) + ( std::get<2>(c) == -4 ? columnHeight / 2 : columnHeight) ,
                       2 * columnHeight,
                       2 * columnHeight, distance);
             }
