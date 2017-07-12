@@ -124,6 +124,10 @@ std::vector<std::pair<int, int>> visitedCharacters;
         foe->mPosition = {2,1};
         foe->mSpeed.mY = 4.0f;
         mActors.push_back(foe);
+
+        auto otherFoe = std::make_shared<CActor>();
+        otherFoe->mPosition = {20,15};
+        mActors.push_back(otherFoe);
     }
 
     void CGame::tick( long ms ) {
@@ -135,6 +139,8 @@ std::vector<std::pair<int, int>> visitedCharacters;
                 }
             }
         }
+
+        std::vector<std::shared_ptr<CActor>> toRemove;
 
         for ( auto& actor : mActors ) {
 
@@ -161,7 +167,13 @@ std::vector<std::pair<int, int>> visitedCharacters;
                 actor->mPosition.mX = newX;
                 actor->mPosition.mY = newY;
             } else {
-                actor->mSpeed = { 0, 0};
+                if (actor->mType == EActorType::kEnemy) {
+                    actor->mSpeed = {0, 0};
+                } else {
+                    toRemove.push_back(actor);
+                    actor->mSpeed = {0, 0};
+                    continue;
+                }
             }
 
             actor->mAngle += actor->mAngularSpeed;
@@ -175,6 +187,37 @@ std::vector<std::pair<int, int>> visitedCharacters;
             if ( actor != mCamera ) {
                 mMap[newY][newX] = (actor->mType == EActorType::kEnemy) ? -4 : -5;
             }
+        }
+
+        //for all fireballs
+        for ( auto actor : mActors ) {
+
+            if ( actor->mType == EActorType::kEnemy ) {
+                continue;
+            }
+
+            //for all actors
+            for ( auto actor2 : mActors ) {
+
+                if ( actor2->mType == EActorType::kFireball) {
+                    continue;
+                }
+
+                if ( actor2 == mCamera ) {
+                    continue;
+                }
+
+                if ( std::abs(actor->mPosition.mY - actor2->mPosition.mY ) < 0.5f &&
+                     std::abs(actor->mPosition.mX - actor2->mPosition.mX ) < 0.5f ) {
+                    toRemove.push_back( actor2 );
+                    toRemove.push_back( actor );
+                }
+            }
+        }
+
+
+        for ( const auto& actor : toRemove ) {
+            mActors.erase( std::find( std::begin(mActors ), std::end(mActors ), actor )  );
         }
     }
 
@@ -193,18 +236,20 @@ std::vector<std::pair<int, int>> visitedCharacters;
     }
 
     void CGame::spawnFireball(int x, int y, float angle) {
-        auto foe = std::make_shared<CActor>();
-        foe->mType = EActorType::kFireball;
-        foe->mPosition = {x,y};
-        foe->mSpeed = { std::sin((angle * 3.14159f) / 180.0f), std::cos((mCamera->mAngle * 3.14159f) / 180.0f) };
-        mActors.push_back(foe);
+        auto fireball = std::make_shared<CActor>();
+        fireball->mType = EActorType::kFireball;
+        fireball->mPosition = {x,y};
+        fireball->mAngularSpeed = 0;
+        fireball->mAngle = angle;
+        fireball->mSpeed = { std::sin((angle * 3.14159f) / 180.0f) * 0.5f, std::cos((mCamera->mAngle * 3.14159f) / 180.0f) * 0.5f };
+        mActors.push_back(fireball);
     }
 
     CControlCallback CGame::getKeyPressedCallback() {
         return [&](ECommand command) {
 
             if (command == ECommand::kFire1) {
-                spawnFireball( round(std::sin((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f), round(std::cos((mCamera->mAngle * 3.14159f) / 180.0f) * 0.75f), mCamera->mAngle );
+                spawnFireball( mCamera->mPosition.mX, mCamera->mPosition.mY, mCamera->mAngle );
             }
 
             if (command == ECommand::kLeft) {
