@@ -167,25 +167,27 @@ namespace odb {
 
             column += columnsPerDegree;
 
-            for ( const auto& c : mGameSnapshot.mVisibleCharacters ) {
+            for ( const auto& c : mGameSnapshot.mActorAppearances ) {
 
-                if( std::get<0>(c) != d ) {
+                float angle = c.mAngle;
+
+                if( angle != d ) {
                     continue;
                 }
 
                 auto rayCollision = mGameSnapshot.mCurrentScan[d + 45];
 
-                if ( rayCollision.mSquaredDistance < std::get<1>(c) ) {
+                if ( rayCollision.mSquaredDistance < c.mSquaredDistance ) {
                     continue;
                 }
 
-                int distance =  (yRes * Q_rsqrt(std::get<1>(c)));
+                int distance =  (yRes * Q_rsqrt(c.mSquaredDistance));
 
                 int columnHeight = distance;
 
-                draw( std::get<2>(c) == -4 ? textures[ 4  ] : textures[ 5  ],
+                draw( c.mType == EActorType::kEnemy ? textures[ 4  ] : textures[ 5  ],
                       column,
-                      (yRes / 2 - (columnHeight * rayCollision.mHeight) ) + ( std::get<2>(c) == -4 ? columnHeight / 2 : columnHeight) ,
+                      (yRes / 2 - (columnHeight * rayCollision.mHeight) ) + ( c.mType == EActorType::kEnemy ? columnHeight / 2 : columnHeight) ,
                       2 * columnHeight,
                       2 * columnHeight, distance);
             }

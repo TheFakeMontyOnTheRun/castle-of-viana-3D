@@ -25,6 +25,16 @@ namespace odb {
       float mY = 0;
     };
 
+    class ActorAppearance {
+    public:
+        explicit ActorAppearance( Vec2f aPosition, EActorType aType, float aAngle, float aSquaredDistance );
+        Vec2f mPosition;
+        EActorType mType;
+        float mAngle;
+        float mSquaredDistance;
+    };
+
+
     class RayCollision {
     public:
         float mSquaredDistance = 0;

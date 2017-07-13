@@ -10,9 +10,10 @@
 #include "CGame.h"
 
 namespace odb {
-std::vector<std::tuple<int, int, int>> visibleCharacters;
 std::vector<std::pair<int, int>> visitedCharacters;
-    RayCollision CGame::castRay(int offset) {
+std::vector<ActorAppearance> appearances;
+
+    RayCollision CGame::castRay(float offset) {
 
         const auto limit = 40;
 
@@ -41,11 +42,9 @@ std::vector<std::pair<int, int>> visitedCharacters;
 
                 if ( found == std::end( visitedCharacters ) ) {
                     visitedCharacters.push_back( pos );
-
-                    visibleCharacters.emplace_back(static_cast<int>(offset), static_cast<int>(((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f )), type );
+                    float squaredDistance = (((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f ));
+                    appearances.emplace_back( Vec2f{ rx, ry }, type == -4 ? EActorType::kEnemy : EActorType::kFireball, offset, squaredDistance );
                 }
-
-
             }
 
         } while ( ( rx > 0 && rx < limit && ry > 0 && ry < limit ) && ( mMap[ ry ][ rx ] <= 0 ));
@@ -126,7 +125,7 @@ std::vector<std::pair<int, int>> visitedCharacters;
         mActors.push_back(foe);
 
         auto otherFoe = std::make_shared<CActor>();
-        otherFoe->mPosition = {20,15};
+        otherFoe->mPosition = {2,5};
         mActors.push_back(otherFoe);
     }
 
@@ -223,14 +222,14 @@ std::vector<std::pair<int, int>> visitedCharacters;
 
     CGameSnapshot CGame::getGameSnapshot() {
         CGameSnapshot snapshot;
-        visibleCharacters.clear();
         visitedCharacters.clear();
+        appearances.clear();
 
         for (int d = -45; d < 45; ++d) {
             snapshot.mCurrentScan[ d + 45 ] = castRay(d);
         }
-        snapshot.mVisibleCharacters = visibleCharacters;
         snapshot.mCamera = *mCamera;
+        snapshot.mActorAppearances = appearances;
 
         return snapshot;
     }

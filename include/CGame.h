@@ -11,7 +11,7 @@ namespace odb {
         float cossines[ 360 ];
         std::array<std::array< int, 40>, 40 > mMap;
         std::vector<std::shared_ptr<CActor>> mActors;
-        RayCollision castRay(int offset);
+        RayCollision castRay(float offset);
         void spawnFireball( float x, float y, float angle );
     public:
         explicit CGame();

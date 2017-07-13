@@ -1,6 +1,17 @@
 //
 // Created by monty on 04-07-2017.
 //
+
+#include <functional>
+#include <array>
+#include <memory>
+#include <vector>
+#include <iostream>
+#include <cmath>
+#include <algorithm>
+
+#include <Common.h>
+
 namespace odb {
 
     float Q_rsqrt(float number) {
@@ -27,6 +38,10 @@ namespace odb {
         }
 
         return angle;
+    }
+
+    ActorAppearance::ActorAppearance( Vec2f aPosition, EActorType aType, float aAngle, float aSquaredDistance ) :
+            mPosition( aPosition ), mType( aType ), mAngle( aAngle ), mSquaredDistance( aSquaredDistance ) {
     }
 }
 
