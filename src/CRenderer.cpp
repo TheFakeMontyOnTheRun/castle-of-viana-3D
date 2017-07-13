@@ -70,6 +70,15 @@ namespace odb {
                     for ( int fillY = y; fillY < (y + fillDY); ++fillY  ) {
                         for (int fillX = x; fillX < (x + fillDX); ++fillX) {
 
+                            if ( fillX >= 320 || fillX < 0 ) {
+                                continue;
+                            }
+
+                            if ( fillY >= 200 || fillY < 0 ) {
+                                continue;
+                            }
+
+
                             if ( zBuffer[ fillX ] <= zValue ) {
                                 fill( fillX, fillY, 1,1, texel);
                                 zBuffer[ fillX ] = zValue;
