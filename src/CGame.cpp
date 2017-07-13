@@ -217,7 +217,7 @@ std::vector<std::pair<int, int>> visitedCharacters;
 
 
         for ( const auto& actor : toRemove ) {
-            mActors.erase( std::find( std::begin(mActors ), std::end(mActors ), actor )  );
+            mActors.erase( std::remove( std::begin(mActors ), std::end(mActors ), actor )  );
         }
     }
 
