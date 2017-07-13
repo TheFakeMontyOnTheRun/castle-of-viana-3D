@@ -235,7 +235,7 @@ std::vector<std::pair<int, int>> visitedCharacters;
         return snapshot;
     }
 
-    void CGame::spawnFireball(int x, int y, float angle) {
+    void CGame::spawnFireball(float x, float y, float angle) {
         auto fireball = std::make_shared<CActor>();
         fireball->mType = EActorType::kFireball;
         fireball->mPosition = {x,y};
