@@ -25,9 +25,13 @@ std::vector<ActorAppearance> appearances;
         RayCollision collision;
         int angle = wrap360( mCamera->mAngle + offset);
 
+        auto sin_a = sines[ angle ];
+        auto cos_a = cossines[ angle ];
+
+
         do {
-            rx += sines[ angle ];
-            ry += cossines[ angle ];
+            rx += sin_a;
+            ry += cos_a;
             auto type = mMap[ (ry) ][ (rx) ];
             if ( type < 0 ) {
                 float dx = rx - rx0;
