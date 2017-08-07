@@ -243,7 +243,7 @@ namespace odb {
         auto sin_a = sines[ angle ];
         auto cos_a = cossines[ angle ];
 
-        while ( !map.isBlockViewAt({ rx, ry} ) ) {
+        while ( !map.isBlockViewAt(Knights::Vec2i{static_cast<int>(rx), static_cast<int>(ry)} ) ) {
             rx -= sin_a;
             ry -= cos_a;
         }
@@ -254,7 +254,7 @@ namespace odb {
 
 
         collision.mSquaredDistance = ((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f );
-        collision.mCollisionPoint = { rx, ry };
+        collision.mCollisionPoint = Vec2f{ rx, ry };
         collision.mHeight = 1;
         collision.mElement = 1;
         return collision;
