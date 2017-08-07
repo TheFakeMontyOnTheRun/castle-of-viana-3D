@@ -29,13 +29,19 @@
 #include <string>
 #include <vector>
 
-
-#include "Common.h"
-#include "CGameSnapshot.h"
+#include "RaycastCommon.h"
+#include "Vec2i.h"
+#include "IMapElement.h"
+#include "CTeam.h"
+#include "CItem.h"
+#include "CActor.h"
+#include "CGameDelegate.h"
+#include "CMap.h"
+#include "IRenderer.h"
+#include "IFileLoaderDelegate.h"
 #include "CGame.h"
-#include "CRenderer.h"
 #include "NativeBitmap.h"
-#include "LoadPNG.h"
+#include "CRenderer.h"
 
 namespace odb {
 
@@ -100,8 +106,13 @@ namespace odb {
     return shade;
   }
   
-  CRenderer::CRenderer( CControlCallback keyPressedCallback, CControlCallback keyReleasedCallback ):
-    mOnKeyPressedCallback( keyPressedCallback ), mOnKeyReleasedCallback( keyReleasedCallback ) {
+  CRenderer::CRenderer() {
+      for ( int c = 0; c < 360; ++c ) {
+          auto sin_a = (std::sin((c * 3.14159f) / 180.0f)) / 16.0f;
+          auto cos_a = (std::cos((c * 3.14159f) / 180.0f)) / 16.0f;
+          sines[ c ] = sin_a;
+          cossines[ c ] = cos_a;
+      }
 
       __dpmi_regs reg;
       
@@ -125,27 +136,22 @@ namespace odb {
   }
   
   void CRenderer::handleSystemEvents() {
-    mOnKeyReleasedCallback( ECommand::kLeft );
-    mOnKeyReleasedCallback( ECommand::kRight );
-    mOnKeyReleasedCallback( ECommand::kUp );
-    mOnKeyReleasedCallback( ECommand::kDown );
-	
     while ( kbhit() ) {
       switch ( getch() ) {
       case 'a':
-	mOnKeyPressedCallback( ECommand::kLeft );
+          mBufferedCommand = Knights::kTurnPlayerLeftCommand;
 	break;
       case 'd':
-	mOnKeyPressedCallback( ECommand::kRight );
+          mBufferedCommand = Knights::kTurnPlayerRightCommand;
 	break;
       case 'w':
-	mOnKeyPressedCallback( ECommand::kUp );
+          mBufferedCommand = Knights::kMovePlayerForwardCommand;
 	break;
       case 's':
-	mOnKeyPressedCallback( ECommand::kDown );
+          mBufferedCommand = Knights::kMovePlayerBackwardCommand;
 	break;
       case 'z':
-          mOnKeyPressedCallback( ECommand::kFire1 );
+          mBufferedCommand = Knights::kUseCurrentItemInInventoryCommand;
 	break;
       default:
 	break;
@@ -167,5 +173,7 @@ namespace odb {
     }
     
     dosmemput(&buffer[0], 64000, 0xa0000);
+      gotoxy(1,1);
+      std::cout << frame++ << std::endl;
   }
 }
