@@ -20,11 +20,7 @@
 #include "IRenderer.h"
 #include "IFileLoaderDelegate.h"
 #include "CGame.h"
-#include "CGame.h"
-
-#include "IFileLoaderDelegate.h"
 #include "CPlainFileLoader.h"
-
 #include "Vec2i.h"
 #include "IMapElement.h"
 #include "CTeam.h"
@@ -34,9 +30,6 @@
 #include "CMap.h"
 #include "IRenderer.h"
 #include "commands/IGameCommand.h"
-
-
-
 #include "RaycastCommon.h"
 #include "CRenderer.h"
 
