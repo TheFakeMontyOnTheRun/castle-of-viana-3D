@@ -10,7 +10,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include <Common.h>
+#include "RaycastCommon.h"
 
 namespace odb {
 
@@ -38,10 +38,6 @@ namespace odb {
         }
 
         return angle;
-    }
-
-    ActorAppearance::ActorAppearance( Vec2f aPosition, EActorType aType, float aAngle, float aSquaredDistance ) :
-            mPosition( aPosition ), mType( aType ), mAngle( aAngle ), mSquaredDistance( aSquaredDistance ) {
     }
 }
 

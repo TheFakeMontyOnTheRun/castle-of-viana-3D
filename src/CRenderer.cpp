@@ -23,9 +23,17 @@
 #include <vector>
 
 
-#include "Common.h"
-#include "CGameSnapshot.h"
-#include "CGame.h"
+#include "Vec2i.h"
+#include "IMapElement.h"
+#include "CTeam.h"
+#include "CItem.h"
+#include "CActor.h"
+#include "CGameDelegate.h"
+#include "CMap.h"
+
+#include "IRenderer.h"
+
+#include "RaycastCommon.h"
 #include "CRenderer.h"
 #include "NativeBitmap.h"
 #include "LoadPNG.h"
@@ -40,8 +48,20 @@ namespace odb {
             loadPNG("res/fireball.png"),
     };
 
-    void CRenderer::setSnapshot( const CGameSnapshot& snapshot ) {
-        this->mGameSnapshot = snapshot;
+    void CRenderer::drawMap( Knights::CMap& map, std::shared_ptr<Knights::CActor> current ) {
+
+        mCamera = current->getPosition();
+        mAngle = (static_cast<int>(current->getDirection()) * 90);
+        for (int d = -45; d < 45; ++d) {
+            mCurrentScan[ d + 45 ] = castRay(d, map);
+        }
+//        std::cout << "--------" << std::endl;
+//        for ( int y = 0; y < 40; ++y ) {
+//            for ( int x = 0; x < 40; ++x ) {
+//                std::cout << map.isBlockMovementAt({x, y });
+//            }
+//            std::cout << std::endl;
+//        }
     }
 
 
@@ -118,11 +138,11 @@ namespace odb {
 
       for (int d = -45; d < 45; ++d) {
           int index = 1;
-          auto rayCollision = mGameSnapshot.mCurrentScan[ d + 45 ];
+          auto rayCollision = mCurrentScan[ d + 45 ];
 
-          if ( rayCollision.mElement > 0 && rayCollision.mElement < textures.size()  ) {
-              index = rayCollision.mElement;
-          }
+//          if ( rayCollision.mElement > 0 && rayCollision.mElement < textures.size()  ) {
+//              index = rayCollision.mElement;
+//          }
 
 
           const int* textureData = textures[ index ]->getPixelData();
@@ -172,35 +192,35 @@ namespace odb {
       }
 
         column = -columnsPerDegree;
-        for (int d = -45; d < 45; ++d) {
-
-            column += columnsPerDegree;
-
-            for ( const auto& c : mGameSnapshot.mActorAppearances ) {
-
-                float angle = c.mAngle;
-
-                if( angle != d ) {
-                    continue;
-                }
-
-                auto rayCollision = mGameSnapshot.mCurrentScan[d + 45];
-
-                if ( rayCollision.mSquaredDistance < c.mSquaredDistance ) {
-                    continue;
-                }
-
-                int distance =  (yRes * Q_rsqrt(c.mSquaredDistance));
-
-                int columnHeight = distance;
-
-                draw( c.mType == EActorType::kEnemy ? textures[ 4  ] : textures[ 5  ],
-                      column,
-                      (yRes / 2 - (columnHeight * rayCollision.mHeight) ) + ( c.mType == EActorType::kEnemy ? columnHeight / 2 : columnHeight) ,
-                      2 * columnHeight,
-                      2 * columnHeight, distance);
-            }
-        }
+//        for (int d = -45; d < 45; ++d) {
+//
+//            column += columnsPerDegree;
+//
+//            for ( const auto& c : mGameSnapshot.mActorAppearances ) {
+//
+//                float angle = c.mAngle;
+//
+//                if( angle != d ) {
+//                    continue;
+//                }
+//
+//                auto rayCollision = mGameSnapshot.mCurrentScan[d + 45];
+//
+//                if ( rayCollision.mSquaredDistance < c.mSquaredDistance ) {
+//                    continue;
+//                }
+//
+//                int distance =  (yRes * Q_rsqrt(c.mSquaredDistance));
+//
+//                int columnHeight = distance;
+//
+//                draw( c.mType == EActorType::kEnemy ? textures[ 4  ] : textures[ 5  ],
+//                      column,
+//                      (yRes / 2 - (columnHeight * rayCollision.mHeight) ) + ( c.mType == EActorType::kEnemy ? columnHeight / 2 : columnHeight) ,
+//                      2 * columnHeight,
+//                      2 * columnHeight, distance);
+//            }
+//        }
 
 
 
@@ -208,4 +228,41 @@ namespace odb {
         flip();
 
   }
+
+
+    RayCollision CRenderer::castRay(float offset, const Knights::CMap& map) {
+
+        float rx0 = mCamera.x;
+        float ry0 = mCamera.y;
+
+        float rx = rx0;
+        float ry = ry0;
+        RayCollision collision;
+        int angle = 360 - wrap360( mAngle + offset);
+
+        auto sin_a = sines[ angle ];
+        auto cos_a = cossines[ angle ];
+
+        while ( !map.isBlockViewAt({ rx, ry} ) ) {
+            rx -= sin_a;
+            ry -= cos_a;
+        }
+
+
+        float dx = rx - rx0;
+        float dy = ry - ry0;
+
+
+        collision.mSquaredDistance = ((( dx * dx ) + ( dy * dy )) * cossines[ wrap360( offset)  ] * 16.0f );
+        collision.mCollisionPoint = { rx, ry };
+        collision.mHeight = 1;
+        collision.mElement = 1;
+        return collision;
+    }
+
+    Knights::CommandType CRenderer::getInput() {
+        auto toReturn = mBufferedCommand;
+        mBufferedCommand = '.';
+        return toReturn;
+    }
 }

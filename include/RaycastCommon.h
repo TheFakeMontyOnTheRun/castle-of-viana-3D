@@ -14,26 +14,11 @@ namespace odb {
         kFire2
     };
 
-    enum class EActorType {
-        kEnemy,
-        kFireball
-    };
-
     class Vec2f {
     public:
       float mX = 0;
       float mY = 0;
     };
-
-    class ActorAppearance {
-    public:
-        explicit ActorAppearance( Vec2f aPosition, EActorType aType, float aAngle, float aSquaredDistance );
-        Vec2f mPosition;
-        EActorType mType;
-        float mAngle;
-        float mSquaredDistance;
-    };
-
 
     class RayCollision {
     public:
@@ -42,18 +27,6 @@ namespace odb {
         int mHeight = 0;
         int mElement = 0;
     };
-
-    class CActor {
-    public:
-        Vec2f mPosition = { 0, 0 };
-        Vec2f mSpeed = { 0, 0 };
-        float mAngularSpeed = 0;
-        float mAngle = 0;
-        EActorType mType = EActorType::kEnemy;
-    };
-
-    using MapLine = std::array<int, 20>;
-    using IntGameMap = std::array<MapLine, 20>;
 
     using CControlCallback = std::function< void(ECommand) >;
 

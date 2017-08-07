@@ -4,8 +4,19 @@
 #include <array>
 #include <vector>
 #include <memory>
-
-#include "Common.h"
+#include <map>
+#include "RaycastCommon.h"
+#include "Vec2i.h"
+#include "IMapElement.h"
+#include "CTeam.h"
+#include "CItem.h"
+#include "CActor.h"
+#include "CGameDelegate.h"
+#include "CMap.h"
+#include "IRenderer.h"
+#include "IFileLoaderDelegate.h"
+#include "CGame.h"
+#include "NativeBitmap.h"
 #include "CRenderer.h"
 
 #include <SDL/SDL.h>
@@ -18,11 +29,17 @@ namespace odb {
 
     SDL_Surface *video;
 
-    CRenderer::CRenderer( CControlCallback keyPressedCallback, CControlCallback keyReleasedCallback ):
-    mOnKeyPressedCallback( keyPressedCallback ), mOnKeyReleasedCallback( keyReleasedCallback )
-    {
+    CRenderer::CRenderer() {
         SDL_Init( SDL_INIT_EVERYTHING );
         video = SDL_SetVideoMode( xRes, yRes, 32, 0 );
+
+        for ( int c = 0; c < 360; ++c ) {
+            auto sin_a = (std::sin((c * 3.14159f) / 180.0f)) / 16.0f;
+            auto cos_a = (std::cos((c * 3.14159f) / 180.0f)) / 16.0f;
+            sines[ c ] = sin_a;
+            cossines[ c ] = cos_a;
+        }
+
     }
 
     void CRenderer::sleep( long ms ) {
@@ -46,9 +63,6 @@ namespace odb {
 #ifndef __EMSCRIPTEN__
 		  exit(0);
 #endif
-		case SDLK_LEFT:
-                        mOnKeyReleasedCallback( ECommand::kLeft );
-                        break;
 		default:
 		  break;
                 }
@@ -57,20 +71,20 @@ namespace odb {
             if ( event.type == SDL_KEYDOWN ) {
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
-                        mOnKeyPressedCallback(ECommand::kFire1);
+                        mBufferedCommand = Knights::kUseCurrentItemInInventoryCommand;
                         break;
 
                     case SDLK_LEFT:
-                        mOnKeyPressedCallback(ECommand::kLeft);
+                        mBufferedCommand = Knights::kTurnPlayerLeftCommand;
                         break;
                     case SDLK_RIGHT:
-                        mOnKeyPressedCallback(ECommand::kRight);
+                        mBufferedCommand = Knights::kTurnPlayerRightCommand;
                         break;
                     case SDLK_UP:
-                        mOnKeyPressedCallback(ECommand::kUp);
+                        mBufferedCommand = Knights::kMovePlayerForwardCommand;
                         break;
                     case SDLK_DOWN:
-                        mOnKeyPressedCallback(ECommand::kDown);
+                        mBufferedCommand = Knights::kMovePlayerBackwardCommand;
                         break;
 
                     default:
