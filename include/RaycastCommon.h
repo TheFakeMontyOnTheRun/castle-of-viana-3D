@@ -4,6 +4,9 @@
 
 #ifndef BLANKSLATE_COMMON_H
 #define BLANKSLATE_COMMON_H
+
+#include <Vec2i.h>
+
 namespace odb {
     enum class ECommand {
         kUp,
@@ -14,16 +17,10 @@ namespace odb {
         kFire2
     };
 
-    class Vec2f {
-    public:
-      float mX = 0;
-      float mY = 0;
-    };
-
     class RayCollision {
     public:
         float mSquaredDistance = 0;
-        Vec2f mCollisionPoint = {0,0};
+        Knights::Vec2i mCollisionPoint = {0,0};
         int mHeight = 0;
         int mElement = 0;
     };

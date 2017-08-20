@@ -6,6 +6,7 @@ find_package(SDL REQUIRED)
 set(CMAKE_CXX_STANDARD 14)
 include_directories(include)
 include_directories(stb)
+include_directories(fixed_point/include)
 include_directories(noudar-core/noudar-core/include)
 
 set(SOURCE_FILES

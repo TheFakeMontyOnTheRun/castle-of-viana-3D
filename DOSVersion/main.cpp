@@ -14,6 +14,10 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <sg14/fixed_point>
+
+using sg14::fixed_point;
+
 #include "Vec2i.h"
 #include "IMapElement.h"
 #include "CTeam.h"

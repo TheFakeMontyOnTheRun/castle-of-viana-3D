@@ -1,7 +1,9 @@
 CXX = i586-pc-msdosdjgpp-g++
 LD = i586-pc-msdosdjgpp-ld
 
-CXXFLAGS = -g -Iinclude -c -Istb -fpermissive -c -O6 -Ofast  -funroll-loops -funroll-all-loops -fomit-frame-pointer -fno-exceptions -ffast-math -mtune=i486 -march=i486 -IDOS-version -Iinclude -Istb -Inoudar-core/noudar-core/include
+CXXFLAGS = -g -Iinclude -c -Istb -fpermissive -c -O6 -Ofast  -funroll-loops -funroll-all-loops -fomit-frame-pointer -fno-exceptions -ffast-math -mtune=i486 -march=i486 -Ifixed_point/include -IDOS-version -Iinclude -Istb -Inoudar-core/noudar-core/include
+
+LDFLAGS = -lemu
 
 OBJS = src/CRenderer.o \
     src/RaycastCommon.o \
@@ -43,7 +45,7 @@ OBJS = src/CRenderer.o \
 TARGET = game.exe
 
 $(TARGET):	$(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
+	$(CXX) -o $(TARGET) $(OBJS) $(LIBS) $(LDFLAGS)
 
 all:   $(TARGET)
 

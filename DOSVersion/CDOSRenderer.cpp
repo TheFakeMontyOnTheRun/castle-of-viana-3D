@@ -28,6 +28,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sg14/fixed_point>
+
+using sg14::fixed_point;
 
 #include "RaycastCommon.h"
 #include "Vec2i.h"
@@ -108,8 +111,8 @@ namespace odb {
   
   CRenderer::CRenderer() {
       for ( int c = 0; c < 360; ++c ) {
-          auto sin_a = (std::sin((c * 3.14159f) / 180.0f)) / 16.0f;
-          auto cos_a = (std::cos((c * 3.14159f) / 180.0f)) / 16.0f;
+          auto sin_a = fixed_point<int32_t , -16>{(std::sin((c * 3.14159f) / 180.0f)) / 16.0f};
+          auto cos_a = fixed_point<int32_t , -16>{(std::cos((c * 3.14159f) / 180.0f)) / 16.0f};
           sines[ c ] = sin_a;
           cossines[ c ] = cos_a;
       }
