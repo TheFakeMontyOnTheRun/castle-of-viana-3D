@@ -18,6 +18,7 @@
 
 using sg14::fixed_point;
 
+#include "NativeBitmap.h"
 #include "Vec2i.h"
 #include "IMapElement.h"
 #include "CTeam.h"

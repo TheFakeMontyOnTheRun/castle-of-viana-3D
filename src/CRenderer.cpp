@@ -53,6 +53,57 @@ namespace odb {
         }
     }
 
+    void CRenderer::draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, int zValue ) {
+        fixed_point<int32_t, -16> stepX = fixed_point<int32_t, -16>{bitmap->getWidth() / static_cast<float>(w)};
+        fixed_point<int32_t, -16> stepY = fixed_point<int32_t, -16>{bitmap->getHeight() / static_cast<float>(h)};
+        int *pixelData = bitmap->getPixelData();
+        int bWidth = bitmap->getWidth();
+        //fixed_point<int32_t, -16>
+        fixed_point<int32_t, -16> px{0};
+        fixed_point<int32_t, -16> py{0};
+
+        int fillDX = std::max( 1, static_cast<int>(stepX) );
+        int fillDY = std::max( 1, static_cast<int>(stepY) );
+
+        for ( int y = y0; y < ( y0 + h ); ++y ) {
+            px = 0;
+            for ( int x = x0; x < ( x0 + w ); ++x ) {
+                int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
+
+                if ( ( ( pixel & 0xFF000000 ) >> 24 ) > 0 ) {
+                    auto texel = std::array< uint8_t, 4 >{0 ,
+                                                          static_cast<unsigned char>((pixel & 0xFF) >> 0),
+                                                          static_cast<unsigned char>((pixel & 0x00FF00) >> 8),
+                                                          static_cast<unsigned char>((pixel & 0xFF0000) >> 16) };
+
+                    for ( int fillY = y; fillY < (y + fillDY); ++fillY  ) {
+                        for (int fillX = x; fillX < (x + fillDX); ++fillX) {
+
+                            if ( fillX >= 320 || fillX < 0 ) {
+                                continue;
+                            }
+
+                            if ( fillY >= 200 || fillY < 0 ) {
+                                continue;
+                            }
+
+
+                            if ( zBuffer[ fillX ] <= zValue ) {
+                                fill( fillX, fillY, 1,1, texel);
+                                zBuffer[ fillX ] = zValue;
+                            }
+                        }
+                    }
+
+
+
+                }
+                px += stepX;
+            }
+            py += stepY;
+        }
+    }
+
     void CRenderer::render(long ms) {
 
 

@@ -14,6 +14,7 @@ namespace odb {
         Knights::CommandType mBufferedCommand = '.';
     public:
         void drawMap( Knights::CMap& map, std::shared_ptr<Knights::CActor> current ) override;
+        void draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, int zValue );
         Knights::CommandType getInput() override;
     private:
         int zBuffer[ 320 ];
