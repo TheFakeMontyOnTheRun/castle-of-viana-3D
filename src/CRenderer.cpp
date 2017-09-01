@@ -42,14 +42,20 @@ namespace odb {
     std::vector<std::shared_ptr<odb::NativeBitmap>> textures{
             loadPNG("res/tile0.png"),
             loadPNG("res/tile0.png"),
+            loadPNG("res/bricks0.png"),
     };
 
     void CRenderer::drawMap(Knights::CMap &map, std::shared_ptr<Knights::CActor> current) {
 
         mCamera = current->getPosition();
         mAngle = (static_cast<int>(current->getDirection()) * 90);
-        for (int d = -45; d < 45; ++d) {
-            mCurrentScan[d + 45] = castRay(d, map);
+        fixed_point<int32_t , -16> angle{-45};
+        fixed_point<int32_t , -16> fov{ 90 };
+        fixed_point<int32_t , -16> width{ 320 };
+        fixed_point<int32_t , -16> increment = fixed_point<int32_t , -16>{ 90.0f / 320.0f };
+        for (int d = 0; d < 320; ++d) {
+            angle += increment;
+            mCurrentScan[d] = castRay(static_cast<int>(angle), map);
         }
     }
 
@@ -113,20 +119,20 @@ namespace odb {
         fill(0, yRes / 2, xRes, yRes / 2, {0, 192, 192, 192});
 
 
-        constexpr auto columnsPerDegree = (xRes / 90) + 1;
-        auto column = 0;
+        fixed_point<int32_t , -16> angle{-45};
+        fixed_point<int32_t , -16> fov{ 90 };
+        fixed_point<int32_t , -16> width{ 320 };
+        fixed_point<int32_t , -16> increment = sg14::divide( fov, width );
 
-        auto texture = textures[1];
-
-        const int textureWidth = texture->getWidth();
-        const int textureHeight = texture->getHeight();
-
-
-        for (int d = -45; d < 45; ++d) {
+        for (int d = 0; d < 320; ++d) {
             int index = 1;
-            auto rayCollision = mCurrentScan[d + 45];
+            angle += increment;
+            auto rayCollision = mCurrentScan[d];
+            auto texture = textures[rayCollision.mElement];
+            const int textureWidth = texture->getWidth();
+            const int textureHeight = texture->getHeight();
 
-            const int *textureData = textures[index]->getPixelData();
+            const int *textureData = texture->getPixelData();
 
             int distance = std::floor<int>(yRes * Q_rsqrt(rayCollision.mSquaredDistance));
 
@@ -143,18 +149,15 @@ namespace odb {
 
                 unsigned int pixel = textureData[(textureWidth * v) + ((ux + uz) % textureWidth)];
 
-                for (int c = 0; c < columnsPerDegree; ++c) {
+                int zColumn = d;
 
-                    int zColumn = column + c;
-
-                    if (zColumn > 0 && zColumn < 320) {
-                        zBuffer[zColumn] = distance;
-                    }
+                if (zColumn > 0 && zColumn < 320) {
+                    zBuffer[zColumn] = distance;
                 }
 
-                fill(column,
+                fill(d,
                      (yRes / 2 - (columnHeight * rayCollision.mHeight) + y),
-                     (columnsPerDegree),
+                     1,
                      1,
                      {0,
                       static_cast<unsigned char>((pixel & 0xFF) >> 0),
@@ -163,10 +166,7 @@ namespace odb {
                      }
                 );
             }
-
-            column += columnsPerDegree;
         }
-
         flip();
     }
 
@@ -184,23 +184,41 @@ namespace odb {
 
         fixed_point<int32_t, -16> sin_a = sines[angle];
         fixed_point<int32_t, -16> cos_a = cossines[angle];
-        int distance = 0;
+
+        auto distance = 0;
 
         while (!map.isBlockViewAt(Knights::Vec2i{static_cast<int>(rx), static_cast<int>(ry)})) {
             rx -= sin_a;
             ry -= cos_a;
-            distance++;
+            distance += 1;
         }
 
         collision.mSquaredDistance = distance;
-        auto integralX = fixed_point<int32_t , -16>{static_cast<int>(rx)};
-        auto integralY = fixed_point<int32_t , -16>{static_cast<int>(ry)};
+        int intX = static_cast<int>(rx);
+        int intY = static_cast<int>(ry);
+        auto integralX = fixed_point<int32_t , -16>{intX};
+        auto integralY = fixed_point<int32_t , -16>{intY};
         collision.mCollisionPoint = Knights::Vec2i{
                 static_cast<int>(multiply( blockSize.x, (rx - integralX ) )),
                 static_cast<int>(multiply( blockSize.y, (ry - integralY ) ))
         };
-        collision.mHeight = 1;
-        collision.mElement = 1;
+
+        auto element = map.getElementAt({intX, intY});
+
+        switch( element ) {
+            case '1':
+                collision.mElement =  1;
+                collision.mHeight =  1;
+                break;
+            case 'I':
+                collision.mElement =  2;
+                collision.mHeight =  2;
+                break;
+            default:
+                collision.mHeight = 0;
+                collision.mElement =  0;
+        }
+
         return collision;
     }
 

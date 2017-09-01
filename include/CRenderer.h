@@ -5,7 +5,7 @@ namespace odb {
 
     class CRenderer  : public Knights::IRenderer {
 
-        RayCollision mCurrentScan[ 90 ];
+        RayCollision mCurrentScan[ 320 ];
         fixed_point<int32_t, -16> sines[ 360 ];
         fixed_point<int32_t, -16> cossines[ 360 ];
         RayCollision castRay(uint32_t offset, const Knights::CMap& map);
