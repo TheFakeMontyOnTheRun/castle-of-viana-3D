@@ -140,12 +140,12 @@ namespace odb {
             auto dz = rayCollision.mCollisionPoint.y;
 
             int columnHeight = distance;
+            int ux = (textureWidth * dx) / mapSize.x;
+            int uz = (textureWidth * dz) / mapSize.y;
 
             for (int y = 0; y <= columnHeight * (rayCollision.mHeight + 1); ++y) {
 
                 int v = ((textureHeight * y) / columnHeight) % textureHeight;
-                int ux = (textureWidth * dx) / mapSize.x;
-                int uz = (textureWidth * dz) / mapSize.y;
 
                 unsigned int pixel = textureData[(textureWidth * v) + ((ux + uz) % textureWidth)];
 
