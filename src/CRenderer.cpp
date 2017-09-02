@@ -200,7 +200,7 @@ namespace odb {
         fixed_point<int32_t, -16> ry = ry0;
 
         RayCollision collision;
-        int angle = 360 - wrap360(mAngle + offset);
+        int angle = wrap360(360 - (mAngle + offset));
 
         fixed_point<int32_t, -16> sin_a = sines[angle];
         fixed_point<int32_t, -16> cos_a = cossines[angle];
