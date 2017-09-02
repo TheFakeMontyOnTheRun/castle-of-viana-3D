@@ -43,6 +43,7 @@ namespace odb {
             loadPNG("res/tile0.png"),
             loadPNG("res/tile0.png"),
             loadPNG("res/bricks0.png"),
+            loadPNG("res/hero0.png"),
     };
 
     void CRenderer::drawMap(Knights::CMap &map, std::shared_ptr<Knights::CActor> current) {
@@ -55,7 +56,7 @@ namespace odb {
         fixed_point<int32_t , -16> increment = fixed_point<int32_t , -16>{ 90.0f / 320.0f };
         for (int d = 0; d < 320; ++d) {
             angle += increment;
-            mCurrentScan[d] = castRay(static_cast<int>(angle), map);
+            mCurrentScan[d] = castRay(d, static_cast<int>(angle), map);
         }
     }
 
@@ -125,7 +126,6 @@ namespace odb {
         fixed_point<int32_t , -16> increment = sg14::divide( fov, width );
 
         for (int d = 0; d < 320; ++d) {
-            int index = 1;
             angle += increment;
             auto rayCollision = mCurrentScan[d];
             auto texture = textures[rayCollision.mElement];
@@ -167,11 +167,31 @@ namespace odb {
                 );
             }
         }
+
+
+        int index = 0;
+        for ( const auto& actor : mActorsRendered ) {
+            int distance = std::floor<int>(yRes * Q_rsqrt(mCachedDistances[index]));
+
+            int columnHeight = distance;
+
+            draw( textures[ 3  ],
+                  mCachedAngle[ index ],
+                  (yRes / 2 - (columnHeight) ),
+                  2 * columnHeight,
+                  2 * columnHeight, distance);
+            ++index;
+        }
+
+        mCachedAngle.clear();
+        mActorsRendered.clear();
+        mCachedDistances.clear();
+
         flip();
     }
 
 
-    RayCollision CRenderer::castRay(uint32_t offset, const Knights::CMap &map) {
+    RayCollision CRenderer::castRay(int d, uint32_t offset, Knights::CMap &map) {
         const static Knights::Vec2i blockSize = {fixed_point<int32_t, -16>(32), fixed_point<int32_t, -16>(32)};
         fixed_point<int32_t, -16> rx0 = fixed_point<int32_t , -16>{mCamera.x};
         fixed_point<int32_t, -16> ry0 = fixed_point<int32_t , -16>{mCamera.y};
@@ -186,16 +206,27 @@ namespace odb {
         fixed_point<int32_t, -16> cos_a = cossines[angle];
 
         auto distance = 0;
+        int intX = static_cast<int>(rx);
+        int intY = static_cast<int>(ry);
+
+
+        auto beginActors = std::begin( mActorsRendered );
 
         while (!map.isBlockViewAt(Knights::Vec2i{static_cast<int>(rx), static_cast<int>(ry)})) {
             rx -= sin_a;
             ry -= cos_a;
             distance += 1;
+            intX = static_cast<int>(rx);
+            intY = static_cast<int>(ry);
+            auto actor = map.getActorAt({intX, intY });
+            if ( actor != nullptr && actor != map.getAvatar() ) {
+                mCachedDistances.push_back(distance);
+                mActorsRendered.insert(actor);
+                mCachedAngle.push_back(d);
+            }
         }
 
         collision.mSquaredDistance = distance;
-        int intX = static_cast<int>(rx);
-        int intY = static_cast<int>(ry);
         auto integralX = fixed_point<int32_t , -16>{intX};
         auto integralY = fixed_point<int32_t , -16>{intY};
         collision.mCollisionPoint = Knights::Vec2i{

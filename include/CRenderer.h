@@ -1,6 +1,8 @@
 #ifndef IRENDERER_H
 #define IRENDERER_H
 
+#include <set>
+
 namespace odb {
 
     class CRenderer  : public Knights::IRenderer {
@@ -8,10 +10,13 @@ namespace odb {
         RayCollision mCurrentScan[ 320 ];
         fixed_point<int32_t, -16> sines[ 360 ];
         fixed_point<int32_t, -16> cossines[ 360 ];
-        RayCollision castRay(uint32_t offset, const Knights::CMap& map);
+        RayCollision castRay(int d, uint32_t offset, Knights::CMap& map);
         Knights::Vec2i mCamera;
         int mAngle = 0;
         Knights::CommandType mBufferedCommand = '.';
+        std::set<std::shared_ptr<Knights::CActor>> mActorsRendered;
+        std::vector<int> mCachedDistances;
+        std::vector<int> mCachedAngle;
     public:
         void drawMap( Knights::CMap& map, std::shared_ptr<Knights::CActor> current ) override;
         void draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, int zValue );
