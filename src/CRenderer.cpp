@@ -51,9 +51,7 @@ namespace odb {
         mCamera = current->getPosition();
         mAngle = (static_cast<int>(current->getDirection()) * 90);
         fixed_point<int32_t , -16> angle{-45};
-        fixed_point<int32_t , -16> fov{ 90 };
-        fixed_point<int32_t , -16> width{ 320 };
-        fixed_point<int32_t , -16> increment = fixed_point<int32_t , -16>{ 90.0f / 320.0f };
+        fixed_point<int32_t , -16> increment = fixed_point<int32_t , -16>{ 9.0f / 32.0f };
         for (int d = 0; d < 320; ++d) {
             angle += increment;
             mCurrentScan[d] = castRay(d, static_cast<int>(angle), map);
@@ -74,26 +72,29 @@ namespace odb {
 
         for ( int y = y0; y < ( y0 + h ); ++y ) {
             px = 0;
+
             for ( int x = x0; x < ( x0 + w ); ++x ) {
+
                 int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
 
                 if ( ( ( pixel & 0xFF000000 ) >> 24 ) > 0 ) {
+
                     auto texel = std::array< uint8_t, 4 >{0 ,
                                                           static_cast<unsigned char>((pixel & 0xFF) >> 0),
                                                           static_cast<unsigned char>((pixel & 0x00FF00) >> 8),
                                                           static_cast<unsigned char>((pixel & 0xFF0000) >> 16) };
 
                     for ( int fillY = y; fillY < (y + fillDY); ++fillY  ) {
+
+                        if ( fillY >= 200 || fillY < 0 ) {
+                            continue;
+                        }
+
                         for (int fillX = x; fillX < (x + fillDX); ++fillX) {
 
                             if ( fillX >= 320 || fillX < 0 ) {
                                 continue;
                             }
-
-                            if ( fillY >= 200 || fillY < 0 ) {
-                                continue;
-                            }
-
 
                             if ( zBuffer[ fillX ] <= zValue ) {
                                 fill( fillX, fillY, 1,1, texel);
@@ -101,9 +102,6 @@ namespace odb {
                             }
                         }
                     }
-
-
-
                 }
                 px += stepX;
             }
@@ -113,73 +111,103 @@ namespace odb {
 
     void CRenderer::render(long ms) {
 
-
+        const static int halfYRes = yRes / 2;
         const static Knights::Vec2i mapSize = {40, 40};
 
         fill(0, 0, xRes, yRes, {0, 96, 96, 96});
-        fill(0, yRes / 2, xRes, yRes / 2, {0, 192, 192, 192});
-
+        fill(0, halfYRes, xRes, halfYRes, {0, 192, 192, 192});
 
         fixed_point<int32_t , -16> angle{-45};
         fixed_point<int32_t , -16> fov{ 90 };
         fixed_point<int32_t , -16> width{ 320 };
         fixed_point<int32_t , -16> increment = sg14::divide( fov, width );
+        int textureWidth;
+        int textureHeight;
+        int *textureData;
+        int columnHeight;
+        int lastDistance = -1;
+        int lastElement = -1;
+        int dx = -1;
+        int dz = -1;
+        int ux = -1;
+        int uz = -1;
+        int lastPixel = -1;
+        int r = -1;
+        int g = -1;
+        int b = -1;
+        int baseHeight = -1;
+        int lastHeight = -1;
+        Knights::Vec2i collisionPoint{ -1, -1};
 
         for (int d = 0; d < 320; ++d) {
             angle += increment;
             auto rayCollision = mCurrentScan[d];
-            auto texture = textures[rayCollision.mElement];
-            const int textureWidth = texture->getWidth();
-            const int textureHeight = texture->getHeight();
 
-            const int *textureData = texture->getPixelData();
+            if (rayCollision.mElement != lastElement ) {
+                std::shared_ptr<odb::NativeBitmap> texture = textures[rayCollision.mElement];
+                textureWidth = texture->getWidth();
+                textureHeight = texture->getHeight();
+                textureData = texture->getPixelData();
+            }
+            lastElement = rayCollision.mElement;
 
-            int distance = std::floor<int>(yRes * Q_rsqrt(rayCollision.mSquaredDistance));
+            if ( lastDistance != rayCollision.mSquaredDistance ) {
+                columnHeight = yRes / rayCollision.mSquaredDistance;
+            }
+            lastDistance = rayCollision.mSquaredDistance;
 
-            auto dx = rayCollision.mCollisionPoint.x;
-            auto dz = rayCollision.mCollisionPoint.y;
+            if ( collisionPoint.x != rayCollision.mCollisionPoint.x || collisionPoint.y != rayCollision.mCollisionPoint.y ) {
+                dx = rayCollision.mCollisionPoint.x;
+                dz = rayCollision.mCollisionPoint.y;
+                ux = (textureWidth * dx) / mapSize.x;
+                uz = (textureWidth * dz) / mapSize.y;
+            }
+            collisionPoint.x = rayCollision.mCollisionPoint.x;
+            collisionPoint.y = rayCollision.mCollisionPoint.y;
 
-            int columnHeight = distance;
-            int ux = (textureWidth * dx) / mapSize.x;
-            int uz = (textureWidth * dz) / mapSize.y;
+            if ( baseHeight != lastHeight ) {
+                baseHeight = halfYRes - (columnHeight * rayCollision.mHeight);
+            }
+            lastHeight = columnHeight;
+
+            if (d > 0 && d < 320) {
+                zBuffer[d] = columnHeight;
+            }
+
+            int pixelColumn = ((ux + uz) % textureWidth);
 
             for (int y = 0; y <= columnHeight * (rayCollision.mHeight + 1); ++y) {
 
                 int v = ((textureHeight * y) / columnHeight) % textureHeight;
+                unsigned int pixel = textureData[(textureWidth * v) + pixelColumn];
 
-                unsigned int pixel = textureData[(textureWidth * v) + ((ux + uz) % textureWidth)];
-
-                int zColumn = d;
-
-                if (zColumn > 0 && zColumn < 320) {
-                    zBuffer[zColumn] = distance;
+                if ( pixel != lastPixel ) {
+                    r = static_cast<unsigned char>((pixel & 0xFF) >> 0);
+                    g = static_cast<unsigned char>((pixel & 0x00FF00) >> 8);
+                    b = static_cast<unsigned char>((pixel & 0xFF0000) >> 16);
                 }
+                lastPixel = pixel;
 
-                fill(d,
-                     (yRes / 2 - (columnHeight * rayCollision.mHeight) + y),
-                     1,
-                     1,
-                     {0,
-                      static_cast<unsigned char>((pixel & 0xFF) >> 0),
-                      static_cast<unsigned char>((pixel & 0x00FF00) >> 8),
-                      static_cast<unsigned char>((pixel & 0xFF0000) >> 16)
-                     }
-                );
+                fill( d, (baseHeight + y), 1, 1, {0, r, g, b} );
             }
         }
 
-
         int index = 0;
+        lastDistance = -1;
         for ( const auto& actor : mActorsRendered ) {
-            int distance = std::floor<int>(yRes * Q_rsqrt(mCachedDistances[index]));
 
-            int columnHeight = distance;
+            if ( mCachedDistances[index] != lastDistance ) {
+                columnHeight = (yRes / mCachedDistances[index]);
+                baseHeight = (halfYRes - (columnHeight) );
+            }
+            lastDistance = mCachedDistances[index];
 
             draw( textures[ 3  ],
                   mCachedAngle[ index ],
-                  (yRes / 2 - (columnHeight) ),
+                  baseHeight,
                   2 * columnHeight,
-                  2 * columnHeight, distance);
+                  2 * columnHeight,
+                  mCachedDistances[index]);
             ++index;
         }
 
@@ -191,7 +219,7 @@ namespace odb {
     }
 
 
-    RayCollision CRenderer::castRay(int d, uint32_t offset, Knights::CMap &map) {
+    RayCollision CRenderer::castRay(int d, int offset, Knights::CMap &map) {
         const static Knights::Vec2i blockSize = {fixed_point<int32_t, -16>(32), fixed_point<int32_t, -16>(32)};
         fixed_point<int32_t, -16> rx0 = fixed_point<int32_t , -16>{mCamera.x};
         fixed_point<int32_t, -16> ry0 = fixed_point<int32_t , -16>{mCamera.y};
@@ -205,30 +233,30 @@ namespace odb {
         fixed_point<int32_t, -16> sin_a = sines[angle];
         fixed_point<int32_t, -16> cos_a = cossines[angle];
 
-        auto distance = 0;
+        auto distance = fixed_point<int32_t, -16>{0};
+        auto one = fixed_point<int32_t, -16>{1};
         int intX = static_cast<int>(rx);
         int intY = static_cast<int>(ry);
 
-
-        auto beginActors = std::begin( mActorsRendered );
-
-        while (!map.isBlockViewAt(Knights::Vec2i{static_cast<int>(rx), static_cast<int>(ry)})) {
+        while (!map.isBlockViewAt(Knights::Vec2i{intX, intY})) {
             rx -= sin_a;
             ry -= cos_a;
-            distance += 1;
+            distance += one;
             intX = static_cast<int>(rx);
             intY = static_cast<int>(ry);
             auto actor = map.getActorAt({intX, intY });
             if ( actor != nullptr && actor != map.getAvatar() ) {
-                mCachedDistances.push_back(distance);
+                mCachedDistances.push_back(static_cast<float>( multiply( distance, cossines[ wrap360( offset ) ] )));
                 mActorsRendered.insert(actor);
                 mCachedAngle.push_back(d);
             }
         }
 
-        collision.mSquaredDistance = distance;
+        collision.mSquaredDistance = static_cast<float>( multiply( distance, cossines[ wrap360( offset ) ] ));
+
         auto integralX = fixed_point<int32_t , -16>{intX};
         auto integralY = fixed_point<int32_t , -16>{intY};
+
         collision.mCollisionPoint = Knights::Vec2i{
                 static_cast<int>(multiply( blockSize.x, (rx - integralX ) )),
                 static_cast<int>(multiply( blockSize.y, (ry - integralY ) ))

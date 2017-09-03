@@ -10,7 +10,7 @@ namespace odb {
         RayCollision mCurrentScan[ 320 ];
         fixed_point<int32_t, -16> sines[ 360 ];
         fixed_point<int32_t, -16> cossines[ 360 ];
-        RayCollision castRay(int d, uint32_t offset, Knights::CMap& map);
+        RayCollision castRay(int d, int offset, Knights::CMap& map);
         Knights::Vec2i mCamera;
         int mAngle = 0;
         Knights::CommandType mBufferedCommand = '.';
