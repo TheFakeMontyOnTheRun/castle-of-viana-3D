@@ -99,7 +99,7 @@ namespace odb {
         }
     }
 
-    void CRenderer::fill( int x1, int y1, int w, int h, std::array<uint8_t ,4> colour ) {
+    void CRenderer::fill( int x1, int y1, int w, int h, const std::array<uint8_t ,4>& colour ) {
         SDL_Rect rect;
         rect.x = x1;
         rect.y = y1;

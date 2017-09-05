@@ -48,16 +48,16 @@ using sg14::fixed_point;
 
 namespace odb {
 
-  std::array<int, 320 * 200> mBuffer;
+  std::array<int, 320 * 128> mBuffer;
 
   int offset = 0;
-  std::array< unsigned char, 320 * 200 > buffer;
+  std::array< unsigned char, 320 * 128 > buffer;
   int origin = 0;
   int lastOrigin = -1;
   unsigned char shade;
   long frame = 0;
 
-  void CRenderer::fill( int x1, int y1, int w, int h, std::array<uint8_t,4> colour ) {
+  void CRenderer::fill( int x1, int y1, int w, int h, const std::array<uint8_t,4>& colour ) {
       int _x0 = x1;
       int _x1 = (x1 + w);
       int _y0 = y1;
@@ -70,36 +70,14 @@ namespace odb {
       for ( int y = _y0; y < _y1; ++y ) {
 	    for ( int x = _x0; x < _x1; ++x ) {
 
-	        if ( x < 0 || x >= 320 || y < 0 || y >= 200 ) {
+	        if ( x < 0 || x >= 320 || y < 0 || y >= 128 ) {
 	            continue;
 	        }
 	  
 	        mBuffer[ (320 * y ) + x ] = pixel;
 	    }
       }
-    };
-  
-  void drawSquare( int x1, int y1, int x2, int y2, std::array<int,4> colour ) {
-      int _x0 = x1 / 2;
-      int _x1 = x2 / 2;
-      int _y0 = (y1 * 200) / 480;
-      int _y1 = (y2 * 200 ) / 480;
-
-      int pixel = colour[ 1 ];
-      pixel += colour[ 2 ] << 8;
-      pixel += colour[ 3 ] << 8;
-      
-      for ( int y = _y0; y < _y1; ++y ) {
-	for ( int x = _x0; x < _x1; ++x ) {
-
-	  if ( x < 0 || x >= 320 || y < 0 || y >= 200 ) {
-	    continue;
-	  }
-	  
-	  mBuffer[ (320 * y ) + x ] = pixel;
-	}
-      }
-    };
+    }
     
   unsigned char getPaletteEntry( int origin ) {
     unsigned char shade = 0;
@@ -163,7 +141,7 @@ namespace odb {
   }
 
   void CRenderer::flip() {
-    for( int offset = 0; offset < 320 * 200; ++offset ) {
+    for( int offset = 0; offset < 320 * 128; ++offset ) {
       origin = mBuffer[offset];
       
       if ( origin != lastOrigin ) {
@@ -175,8 +153,11 @@ namespace odb {
       buffer[ offset ] = shade;
     }
     
-    dosmemput(&buffer[0], 64000, 0xa0000);
+    dosmemput(&buffer[0], 320 * 128, 0xa0000);
+
       gotoxy(1,1);
-      std::cout << frame++ << std::endl;
+      printf( "%d", ++frame);
+
+
   }
 }
