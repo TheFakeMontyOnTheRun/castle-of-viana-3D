@@ -284,8 +284,8 @@ namespace odb {
             rx -= sin_a;
             ry -= cos_a;
             distance += increment;
-            intX = static_cast<int>(rx);
-            intY = static_cast<int>(ry);
+            intX = std::min( 39, std::max( 0, static_cast<int>(rx) ));
+            intY = std::min( 39, std::max( 0, static_cast<int>(ry) ));
             auto actor = mActors[ intY ][ intX ];
             if ( actor ) {
                 mCachedDistances.push_back(static_cast<float>( multiply( distance, cossines[ wrap360( offset ) ] )));
