@@ -181,16 +181,22 @@ namespace odb {
   }
 
   void CRenderer::flip() {
+      auto source = std::begin(mBuffer);
+      auto destination = std::begin(buffer);
     for( int offset = 0; offset < 320 * 128; ++offset ) {
-      origin = mBuffer[offset];
-      
+
+        auto origin = *source;
+
       if ( origin != lastOrigin ) {
-	shade = getPaletteEntry( origin );
+	    shade = getPaletteEntry( origin );
       }
       
       lastOrigin = origin;
-      
-      buffer[ offset ] = shade;
+
+        *destination = shade;
+
+        source = std::next( source );
+        destination = std::next( destination );
     }
     
     dosmemput(&buffer[0], 320 * 128, 0xa0000);
