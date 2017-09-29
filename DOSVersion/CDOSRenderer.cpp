@@ -93,9 +93,9 @@ namespace odb {
     
   unsigned char getPaletteEntry( int origin ) {
     unsigned char shade = 0;
-    shade += (((((origin & 0x0000FF)      ) << 2  ) >> 8 ) ) << 4;
-    shade += (((((origin & 0x00FF00) >> 8 ) << 2  ) >> 8 ) ) << 2;
-    shade += (((((origin & 0xFF0000) >> 16) << 2  ) >> 8 ) ) << 0;
+    shade += (((((origin & 0x0000FF)      ) << 2  ) >> 8 ) ) << 6;
+    shade += (((((origin & 0x00FF00) >> 8 ) << 3  ) >> 8 ) ) << 3;
+    shade += (((((origin & 0xFF0000) >> 16) << 3  ) >> 8 ) ) << 0;
     return shade;
   }
   
@@ -115,13 +115,13 @@ namespace odb {
       outp(0x03c8, 0);
       
       for ( int r = 0; r < 4; ++r ) {
-	for ( int g = 0; g < 4; ++g ) {
-	  for ( int b = 0; b < 4; ++b ) {
-	    outp(0x03c9, (r * (85) ) );
-	    outp(0x03c9, (g * (85) ) );
-	    outp(0x03c9, (b * (85) ) );
-	  }
-	}
+        for ( int g = 0; g < 8; ++g ) {
+          for ( int b = 0; b < 8; ++b ) {
+            outp(0x03c9, (r * (21) ) );
+            outp(0x03c9, (g * (8) ) );
+            outp(0x03c9, (b * (8) ) );
+          }
+        }
       }
     }
 
