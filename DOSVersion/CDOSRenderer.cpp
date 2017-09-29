@@ -129,27 +129,55 @@ namespace odb {
   }
   
   void CRenderer::handleSystemEvents() {
-    while ( kbhit() ) {
-      switch ( getch() ) {
-      case 'a':
-          mBufferedCommand = Knights::kTurnPlayerLeftCommand;
-	break;
-      case 'd':
-          mBufferedCommand = Knights::kTurnPlayerRightCommand;
-	break;
-      case 'w':
-          mBufferedCommand = Knights::kMovePlayerForwardCommand;
-	break;
-      case 's':
-          mBufferedCommand = Knights::kMovePlayerBackwardCommand;
-	break;
-      case 'z':
-          mBufferedCommand = Knights::kUseCurrentItemInInventoryCommand;
-	break;
-      default:
-	break;
-      }
-    }
+
+          auto lastKey = bioskey(0x11);
+
+          bdos(0xC, 0, 0);
+
+          switch (lastKey) {
+              case 18656:
+                  //up
+                  mBufferedCommand = Knights::kMovePlayerForwardCommand;
+                  mNeedsToRedraw = true;
+                  mCached = false;
+                  break;
+
+              case 8051:
+              case 20704:
+                  //down
+                  mBufferedCommand = Knights::kMovePlayerBackwardCommand;
+                  mNeedsToRedraw = true;
+                  mCached = false;
+                  break;
+
+              case 19424: //right arrow
+              case 4209: //q
+                  //left
+                  mBufferedCommand = Knights::kTurnPlayerLeftCommand;
+                  mNeedsToRedraw = true;
+                  mCached = false;
+                  break;
+
+              case 4709: //e
+              case 19936: //right arrow
+                  //right
+                  mBufferedCommand = Knights::kTurnPlayerRightCommand;
+                  mNeedsToRedraw = true;
+                  mCached = false;
+                  break;
+
+              case 3849:
+              case 14624:
+              case 11785: //c
+              case 5236: //t
+                  //space
+                  mBufferedCommand = Knights::kUseCurrentItemInInventoryCommand;
+                  mNeedsToRedraw = true;
+                  mCached = false;
+                  break;
+
+          }
+
   }
 
   void CRenderer::flip() {
