@@ -219,10 +219,9 @@ namespace odb {
                     colour[ 1 ] = r;
                     colour[ 2 ] = g;
                     colour[ 3 ] = b;
+                    put( d, (baseHeight + y), colour );
                 }
                 lastPixel = pixel;
-
-                fill( d, (baseHeight + y), 1, 1, colour );
 
                 int py = (halfYRes + y );
 

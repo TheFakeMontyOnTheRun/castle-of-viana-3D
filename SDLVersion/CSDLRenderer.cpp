@@ -112,6 +112,17 @@ namespace odb {
         SDL_FillRect(video, &rect, SDL_MapRGB(video->format, colour[ 1 ], colour[ 2 ], colour[ 3 ] ) );
     }
 
+    void CRenderer::put( int x, int y, const std::array<uint8_t ,4>& colour ) {
+        SDL_Rect rect;
+        rect.x = x;
+        rect.y = y;
+        rect.w = 1;
+        rect.h = 1;
+
+        SDL_FillRect(video, &rect, SDL_MapRGB(video->format, colour[ 1 ], colour[ 2 ], colour[ 3 ] ) );
+    }
+
+
     void CRenderer::flip() {
         SDL_Flip(video);
     }

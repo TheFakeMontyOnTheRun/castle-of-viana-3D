@@ -58,6 +58,20 @@ namespace odb {
   unsigned char shade;
   long frame = 0;
 
+
+
+    void CRenderer::put( int x, int y, const std::array<uint8_t ,4>& colour ) {
+        int pixel = colour[ 1 ] & 0xFF;
+        pixel += (colour[ 2 ] & 0xFF) << 8;
+        pixel += (colour[ 3 ] & 0xFF) << 16;
+
+        if ( x < 0 || x >= 320 || y < 0 || y >= 128 ) {
+	        return;
+        }
+
+        mBuffer[ (320 * y ) + x ] = pixel;
+    }
+
   void CRenderer::fill( int x1, int y1, int w, int h, const std::array<uint8_t,4>& colour ) {
       int _x0 = x1;
       int _x1 = (x1 + w);

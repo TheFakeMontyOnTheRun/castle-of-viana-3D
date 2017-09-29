@@ -26,6 +26,7 @@ namespace odb {
     private:
         int zBuffer[ 320 ];
         void fill( int x1, int y1, int w, int h, const std::array<uint8_t,4>& colour );
+        void put( int x, int y, const std::array<uint8_t,4>& colour );
         void flip();
      public:
         CRenderer();
