@@ -73,24 +73,21 @@ namespace odb {
     }
 
   void CRenderer::fill( int x1, int y1, int w, int h, const std::array<uint8_t,4>& colour ) {
-      int _x0 = x1;
-      int _x1 = (x1 + w);
-      int _y0 = y1;
-      int _y1 = (y1 + h);
+      int _x0 = std::min( 319, std::max( 0, x1) );
+      int _x1 = std::min( 319, std::max( 0,  (x1 + w) ) );
+      int _y0 = std::min( 127, std::max( 0,  y1 ) );
+      int _y1 = std::min( 127, std::max( 0,  (y1 + h) ) );
 
       int pixel = colour[ 1 ] & 0xFF;
       pixel += (colour[ 2 ] & 0xFF) << 8;
       pixel += (colour[ 3 ] & 0xFF) << 16;
-      
-      for ( int y = _y0; y < _y1; ++y ) {
-	    for ( int x = _x0; x < _x1; ++x ) {
 
-	        if ( x < 0 || x >= 320 || y < 0 || y >= 128 ) {
-	            continue;
-	        }
-	  
-	        mBuffer[ (320 * y ) + x ] = pixel;
-	    }
+      auto data = std::begin( mBuffer );
+
+
+      for ( int y = _y0; y < _y1; ++y ) {
+        auto line = data + (320 * y );
+          std::fill( line + _x0, line + _x1, pixel );
       }
     }
     
