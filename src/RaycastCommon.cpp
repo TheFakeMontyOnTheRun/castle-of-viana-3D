@@ -3,12 +3,18 @@
 //
 
 #include <functional>
-#include <array>
 #include <memory>
-#include <vector>
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <sg14/fixed_point>
+#include <EASTL/vector.h>
+#include <EASTL/array.h>
+
+using eastl::vector;
+using eastl::array;
+
+using sg14::fixed_point;
 
 #include "RaycastCommon.h"
 

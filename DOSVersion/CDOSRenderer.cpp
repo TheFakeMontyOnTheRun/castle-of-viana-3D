@@ -1,10 +1,9 @@
-#include <array>
 #include <string>
 #include <iostream>
-#include <vector>
 #include <memory>
 #include <map>
 #include <conio.h>
+#include <iterator>
 #include <dpmi.h>
 #include <go32.h>
 #include <sys/movedata.h>
@@ -19,16 +18,18 @@
 #include <cmath>
 #include <algorithm>
 #include <cmath>
-#include <vector>
 #include <cstring>
 #include <memory>
 #include <iostream>
 #include <map>
-#include <array>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <sg14/fixed_point>
+#include <EASTL/vector.h>
+#include <EASTL/array.h>
+
+using eastl::vector;
+using eastl::array;
 
 using sg14::fixed_point;
 

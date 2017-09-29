@@ -3,7 +3,7 @@ CXX = clang++
 SDL_LIB = `sdl-config --libs` -lSDL_gfx -lSDL_image -lSDL_mixer
 SDL_INCLUDE =  `sdl-config --cflags `
 
-CXXFLAGS = -std=c++14 -O2 -g $(SDL_INCLUDE) -Iinclude -Ifixed_point/include -Istb -Inoudar-core/noudar-core/include
+CXXFLAGS = -std=c++14 -O2 -g $(SDL_INCLUDE) -Iinclude -Ifixed_point/include -Istb -Inoudar-core/noudar-core/include  -I../noudar-core/EASTL/include -I../noudar-core/EASTL/test/packages/EABase/include/Common
 
 OBJS = SDLVersion/main.o \
         SDLVersion/CSDLRenderer.o \

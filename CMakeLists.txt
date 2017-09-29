@@ -8,6 +8,8 @@ include_directories(include)
 include_directories(stb)
 include_directories(fixed_point/include)
 include_directories(noudar-core/noudar-core/include)
+include_directories(../noudar-core/EASTL/include )
+include_directories(../noudar-core/EASTL/test/packages/EABase/include/Common)
 
 set(SOURCE_FILES
         SDLVersion/CSDLRenderer.cpp
@@ -63,7 +65,6 @@ set(SOURCE_FILES
         noudar-core/noudar-core/src/CCharacterArchetype.cpp
         noudar-core/noudar-core/src/CHuntApproach.cpp
         noudar-core/noudar-core/src/CGameDelegate.cpp
-        noudar-core/noudar-core/src/CRandomWorldGenerator.cpp
         noudar-core/noudar-core/src/CMonster.cpp
         noudar-core/noudar-core/src/IFileLoaderDelegate.cpp
         noudar-core/noudar-core/src/CTeam.cpp

@@ -1,11 +1,14 @@
 #include <string>
 #include <utility>
 #include <functional>
-#include <array>
-#include <vector>
 #include <memory>
 #include <map>
 #include <sg14/fixed_point>
+#include <EASTL/vector.h>
+#include <EASTL/array.h>
+
+using eastl::vector;
+using eastl::array;
 
 using sg14::fixed_point;
 

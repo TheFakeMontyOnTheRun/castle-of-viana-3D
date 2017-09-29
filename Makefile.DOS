@@ -1,7 +1,7 @@
 CXX = i586-pc-msdosdjgpp-g++
 LD = i586-pc-msdosdjgpp-ld
 
-CXXFLAGS = -g -Iinclude -c -Istb -fpermissive -c -O6 -Ofast  -funroll-loops -funroll-all-loops -fomit-frame-pointer -fno-exceptions -ffast-math -mtune=i486 -march=i486 -Ifixed_point/include -IDOS-version -Iinclude -Istb -Inoudar-core/noudar-core/include
+CXXFLAGS = -g -DEA_PLATFORM_LINUX -Iinclude -c -Istb -fpermissive -c -O6 -Ofast  -funroll-loops -funroll-all-loops -fomit-frame-pointer -fno-exceptions -ffast-math -mtune=i486 -march=i486 -Ifixed_point/include -IDOS-version -Iinclude -Istb -Inoudar-core/noudar-core/include  -I../noudar-core/EASTL/include -I../noudar-core/EASTL/test/packages/EABase/include/Common
 
 LDFLAGS = -lemu
 

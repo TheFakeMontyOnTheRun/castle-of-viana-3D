@@ -1,16 +1,18 @@
-#include <vector>
 #include <functional>
 #include <memory>
 #include <iostream>
-#include <array>
 #include <utility>
 #include <string>
 #include <iostream>
 #include <memory>
 #include <fstream>
-#include <vector>
 #include <map>
 #include <sg14/fixed_point>
+#include <EASTL/vector.h>
+#include <EASTL/array.h>
+
+using eastl::vector;
+using eastl::array;
 
 using sg14::fixed_point;
 
@@ -43,6 +45,16 @@ using sg14::fixed_point;
 #include <emscripten/html5.h>
 
 #endif
+
+void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags,
+                     const char* file, int line) {
+    return malloc( size );
+}
+
+void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName,
+                     int flags, unsigned debugFlags, const char* file, int line) {
+    return malloc( size );
+}
 
 std::shared_ptr<odb::CRenderer> renderer;
 

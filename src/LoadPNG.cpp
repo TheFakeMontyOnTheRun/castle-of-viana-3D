@@ -3,9 +3,13 @@
 //
 #include <memory>
 #include <string>
-#include <vector>
 #include <cstdlib>
 #include <cstring>
+#include <EASTL/vector.h>
+#include <EASTL/array.h>
+
+using eastl::vector;
+using eastl::array;
 
 #include "NativeBitmap.h"
 #include "LoadPNG.h"
@@ -15,13 +19,13 @@
 
 namespace odb {
 
-    std::vector<char> readToBuffer(FILE *fileDescriptor) {
+    vector<char> readToBuffer(FILE *fileDescriptor) {
         const unsigned N = 1024;
 
         fseek(fileDescriptor, 0, SEEK_END);
         auto endPos = ftell(fileDescriptor);
         rewind(fileDescriptor);
-        std::vector<char> total(endPos);
+        vector<char> total(endPos);
         auto writeHead = std::begin(total);
 
         for (int c = 0; c < endPos; ++c) {
@@ -41,7 +45,7 @@ namespace odb {
         return total;
     }
 
-    std::vector<char> loadBinaryFileFromPath(const std::string &path) {
+    vector<char> loadBinaryFileFromPath(const std::string &path) {
         FILE *fd;
 
         fd = fopen(path.c_str(), "rb");
@@ -50,7 +54,7 @@ namespace odb {
             exit(0);
         }
 
-        std::vector<char> toReturn = readToBuffer(fd);
+        vector<char> toReturn = readToBuffer(fd);
         fclose(fd);
 
         return toReturn;

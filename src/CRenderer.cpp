@@ -1,7 +1,5 @@
-#include <array>
 #include <string>
 #include <iostream>
-#include <vector>
 #include <memory>
 #include <utility>
 #include <map>
@@ -12,16 +10,18 @@
 #include <cmath>
 #include <algorithm>
 #include <cmath>
-#include <vector>
 #include <cstring>
 #include <memory>
 #include <iostream>
 #include <map>
-#include <array>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <sg14/fixed_point>
+#include <EASTL/vector.h>
+#include <EASTL/array.h>
+
+using eastl::vector;
+using eastl::array;
 
 using sg14::fixed_point;
 
@@ -39,7 +39,7 @@ using sg14::fixed_point;
 #include "LoadPNG.h"
 
 namespace odb {
-    std::vector<std::shared_ptr<odb::NativeBitmap>> textures{
+    vector<std::shared_ptr<odb::NativeBitmap>> textures{
             loadPNG("res/tile0.png"),
             loadPNG("res/tile0.png"),
             loadPNG("res/bricks0.png"),
@@ -259,7 +259,7 @@ namespace odb {
     }
 
 
-    RayCollision CRenderer::castRay(int d, int offset, const std::array<std::array< int, 40>, 40> &map) {
+    RayCollision CRenderer::castRay(int d, int offset, const array<array< int, 40>, 40> &map) {
         const static Knights::Vec2i blockSize = {fixed_point<int32_t, -16>(32), fixed_point<int32_t, -16>(32)};
         fixed_point<int32_t, -16> rx0 = fixed_point<int32_t , -16>{mCamera.x};
         fixed_point<int32_t, -16> ry0 = fixed_point<int32_t , -16>{mCamera.y};
