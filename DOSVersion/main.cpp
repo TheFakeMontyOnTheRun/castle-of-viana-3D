@@ -78,8 +78,9 @@ int main() {
   emscripten_set_main_loop( gameLoopTick, 30, 1 );
 #else
 
+    game->endOfTurn(game->getMap());
+
     while ( game->isPlaying() ) {
-        game->endOfTurn(game->getMap());
         game->tick();
         renderer->sleep( 33 );
         gameLoopTick();

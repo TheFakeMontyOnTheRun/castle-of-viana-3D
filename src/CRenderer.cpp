@@ -43,6 +43,7 @@ namespace odb {
             loadPNG("res/tile0.png"),
             loadPNG("res/tile0.png"),
             loadPNG("res/bricks0.png"),
+            loadPNG("res/tile1.png"),
             loadPNG("res/hero0.png"),
     };
 
@@ -55,9 +56,7 @@ namespace odb {
 
         if (!mCached ) {
             mCached = true;
-
-
-
+            mNeedsToRedraw = true;
 
             for ( int y = 0; y < 40; ++y ) {
                 for ( int x = 0; x < 40; ++x ) {
@@ -84,175 +83,257 @@ namespace odb {
                     }
                 }
             }
-        }
 
-        for (int d = 0; d < xRes; ++d) {
-            angle += increment;
-            mCurrentScan[d] = castRay(d, static_cast<int>(angle), mCache);
+            for (int d = 0; d < xRes; ++d) {
+                angle += increment;
+                mCurrentScan[d] = castRay(d, static_cast<int>(angle), mCache);
+            }
         }
     }
 
     void CRenderer::draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, int zValue ) {
-        fixed_point<int32_t, -16> stepX = fixed_point<int32_t, -16>{bitmap->getWidth() / static_cast<float>(w)};
-        fixed_point<int32_t, -16> stepY = fixed_point<int32_t, -16>{bitmap->getHeight() / static_cast<float>(h)};
-        int *pixelData = bitmap->getPixelData();
-        int bWidth = bitmap->getWidth();
-        fixed_point<int32_t, -16> px{0};
-        fixed_point<int32_t, -16> py{0};
-
-        int fillDX = std::max( 1, static_cast<int>(stepX) );
-        int fillDY = std::max( 1, static_cast<int>(stepY) );
-        int lastTexel = -1;
-        std::array< uint8_t, 4 > texel;
-
-        for ( int y = y0; y < ( y0 + h ); ++y ) {
-            px = 0;
-
-            for ( int x = x0; x < ( x0 + w ); ++x ) {
-
-
-                int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
-
-                if ( pixel != lastTexel ) {
-                    texel = std::array<uint8_t, 4>{0,
-                                                   static_cast<unsigned char>((pixel & 0xFF) >> 0),
-                                                   static_cast<unsigned char>((pixel & 0x00FF00) >> 8),
-                                                   static_cast<unsigned char>((pixel & 0xFF0000) >> 16)};
-                }
-                lastTexel = pixel;
-
-                if ( ( ( pixel & 0xFF000000 ) >> 24 ) > 0 ) {
-                    fill( x, y, fillDX, fillDY, texel);
-                }
-                px += stepX;
-            }
-            py += stepY;
-        }
+//        fixed_point<int32_t, -16> stepX = fixed_point<int32_t, -16>{bitmap->getWidth() / static_cast<float>(w)};
+//        fixed_point<int32_t, -16> stepY = fixed_point<int32_t, -16>{bitmap->getHeight() / static_cast<float>(h)};
+//        int *pixelData = bitmap->getPixelData();
+//        int bWidth = bitmap->getWidth();
+//        fixed_point<int32_t, -16> px{0};
+//        fixed_point<int32_t, -16> py{0};
+//
+//        int fillDX = std::max( 1, static_cast<int>(stepX) );
+//        int fillDY = std::max( 1, static_cast<int>(stepY) );
+//        int lastTexel = -1;
+//        std::array< uint8_t, 4 > texel;
+//
+//        for ( int y = y0; y < ( y0 + h ); ++y ) {
+//            px = 0;
+//
+//            for ( int x = x0; x < ( x0 + w ); ++x ) {
+//
+//
+//                int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
+//
+//                if ( pixel != lastTexel ) {
+//                    texel = std::array<uint8_t, 4>{0,
+//                                                   static_cast<unsigned char>((pixel & 0x000000FF) >> 0),
+//                                                   static_cast<unsigned char>((pixel & 0x0000FF00) >> 8),
+//                                                   static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
+//                }
+//                lastTexel = pixel;
+//
+//                if ( ( ( pixel & 0xFF000000 ) >> 24 ) > 0 ) {
+//                    fill( x, y, fillDX, fillDY, texel);
+//                }
+//                px += stepX;
+//            }
+//            py += stepY;
+//        }
     }
 
     void CRenderer::render(long ms) {
 
-        const static int halfYRes = yRes / 2;
-        const static Knights::Vec2i mapSize = {40, 40};
+        if ( mNeedsToRedraw ) {
+            mNeedsToRedraw = false;
+            const static int halfYRes = yRes / 2;
+            const static Knights::Vec2i mapSize = {40, 40};
 
-        fixed_point<int32_t , -16> angle{-45};
-        fixed_point<int32_t , -16> fov{ 90 };
-        fixed_point<int32_t , -16> width{ xRes };
-        fixed_point<int32_t , -16> increment = sg14::divide( fov, width );
-        int textureWidth;
-        int textureHeight;
-        int *textureData;
-        int columnHeight;
-        int lastDistance = -1;
-        int lastElement = -1;
-        int dx = -1;
-        int dy = -1;
-        int dz = -1;
-        int ux = -1;
-        int uz = -1;
-        int lastPixel = -1;
-        std::array<uint8_t ,4> colour;
-        int baseHeight = -1;
-        int lastHeight = -1;
-        int pixelColumn = -1;
-        Knights::Vec2i collisionPoint{ -1, -1};
+            fixed_point<int32_t , -16> angle{-45};
+            fixed_point<int32_t , -16> fov{ 90 };
+            fixed_point<int32_t , -16> width{ xRes };
+            fixed_point<int32_t , -16> increment = sg14::divide( fov, width );
+            int textureWidth;
+            int textureHeight;
+            int *textureData;
+            int columnHeight;
+            auto lastDistance = fixed_point<int32_t , -16>{-1};
+            int lastElement = -1;
+            int dx = -1;
+            int dy = -1;
+            int dz = -1;
+            int ux = -1;
+            int uz = -1;
+            int lastPixel = -1;
+            std::array<uint8_t ,4> colour;
+            int baseHeight = -1;
+            int lastHeight = -1;
+            int pixelColumn = -1;
+            Knights::Vec2i collisionPoint{ -1, -1};
 
-        for (int d = 0; d < xRes; ++d) {
-            angle += increment;
-            auto rayCollision = mCurrentScan[d];
+//        drawCeiling();
+            // drawFloor();
 
-            if (rayCollision.mElement != lastElement ) {
-                std::shared_ptr<odb::NativeBitmap> texture = textures[rayCollision.mElement];
-                textureWidth = texture->getWidth();
-                textureHeight = texture->getHeight();
-                textureData = texture->getPixelData();
-            }
-            lastElement = rayCollision.mElement;
+            for (int d = 0; d < xRes; ++d) {
+                angle += increment;
+                auto rayCollision = mCurrentScan[d];
 
-            if ( lastDistance != rayCollision.mSquaredDistance ) {
-                columnHeight = yRes / rayCollision.mSquaredDistance;
-            }
-            lastDistance = rayCollision.mSquaredDistance;
-
-            if ( collisionPoint.x != rayCollision.mCollisionPoint.x || collisionPoint.y != rayCollision.mCollisionPoint.y ) {
-                dx = rayCollision.mCollisionPoint.x;
-                dz = rayCollision.mCollisionPoint.y;
-                ux = (textureWidth * dx) / mapSize.x;
-                uz = (textureWidth * dz) / mapSize.y;
-                pixelColumn = (ux + uz);
-
-                if ( pixelColumn >= textureWidth ) {
-                    pixelColumn -= textureWidth;
+                if (rayCollision.mElement != lastElement ) {
+                    std::shared_ptr<odb::NativeBitmap> texture = textures[rayCollision.mElement];
+                    textureWidth = texture->getWidth();
+                    textureHeight = texture->getHeight();
+                    textureData = texture->getPixelData();
                 }
-            }
-            collisionPoint.x = rayCollision.mCollisionPoint.x;
-            collisionPoint.y = rayCollision.mCollisionPoint.y;
+                lastElement = rayCollision.mElement;
 
-            if ( baseHeight != lastHeight ) {
-                baseHeight = halfYRes - (columnHeight * rayCollision.mHeight);
-                dy = (columnHeight * (rayCollision.mHeight));
-            }
-            lastHeight = columnHeight;
+                if ( lastDistance != rayCollision.mSquaredDistance ) {
+                    columnHeight = yRes / rayCollision.mSquaredDistance;
+                }
+                lastDistance = rayCollision.mSquaredDistance;
 
-            if (d >= 0 && d < xRes) {
-                zBuffer[d] = columnHeight;
-            }
+                if ( collisionPoint.x != rayCollision.mCollisionPoint.x ||
+                     collisionPoint.y != rayCollision.mCollisionPoint.y ) {
+                    dx = rayCollision.mCollisionPoint.x;
+                    dz = rayCollision.mCollisionPoint.y;
+                    ux = (textureWidth * dx) / mapSize.x;
+                    uz = (textureWidth * dz) / mapSize.y;
+                    pixelColumn = (ux + uz);
 
-            fill(d, 0,        1, baseHeight,     {0, 96, 96, 96});
-            fill(d, yRes - (baseHeight), 1, baseHeight, {0, 192, 192, 192});
+                    if ( pixelColumn >= textureWidth ) {
+                        pixelColumn -= textureWidth;
+                    }
+                }
+                collisionPoint.x = rayCollision.mCollisionPoint.x;
+                collisionPoint.y = rayCollision.mCollisionPoint.y;
 
-            for (int y = 0; y <= dy; ++y) {
+                if ( baseHeight != lastHeight ) {
+                    baseHeight = halfYRes - (columnHeight * (rayCollision.mHeight));
+                    dy = (columnHeight * (rayCollision.mHeight + 1));
+                }
+                lastHeight = columnHeight;
 
-                int v = ((textureHeight * y) / columnHeight);
-
-                if ( v >= textureHeight ) {
-                    v -= textureHeight;
+                if (d >= 0 && d < xRes) {
+                    zBuffer[d] = columnHeight;
                 }
 
-                int pixel = textureData[( textureWidth * v) + pixelColumn];
+                fill(d, 0,        1, baseHeight,     {0, 96, 96, 96});
+                fill(d, yRes - (baseHeight), 1, baseHeight, {0, 192, 192, 192});
 
-                if ( pixel != lastPixel ) {
-                    int r = static_cast<unsigned char>((pixel & 0xFF) >> 0);
-                    int g = static_cast<unsigned char>((pixel & 0x00FF00) >> 8);
-                    int b = static_cast<unsigned char>((pixel & 0xFF0000) >> 16);
-                    colour[ 0 ] = 0;
-                    colour[ 1 ] = r;
-                    colour[ 2 ] = g;
-                    colour[ 3 ] = b;
+                for (int y = 0; y <= dy; ++y) {
+
+                    int v = ((textureHeight * y) / columnHeight);
+
+                    while ( v >= textureHeight ) {
+                        v -= textureHeight - 1;
+                    }
+
+                    int pixel = textureData[( textureWidth * v) + pixelColumn];
+
+                    if ( pixel != lastPixel ) {
+                        int r = static_cast<unsigned char>((pixel & 0xFF) >> 0);
+                        int g = static_cast<unsigned char>((pixel & 0x00FF00) >> 8);
+                        int b = static_cast<unsigned char>((pixel & 0xFF0000) >> 16);
+                        colour[ 0 ] = 0;
+                        colour[ 1 ] = r;
+                        colour[ 2 ] = g;
+                        colour[ 3 ] = b;
+                    }
+                    lastPixel = pixel;
+
+//                if ( pixelColumn != ux && pixelColumn != uz ) {
+//                    colour[ 1 ] = colour[ 1 ] >> 1;
+//                    colour[ 2 ] = colour[ 2 ] >> 1;
+//                    colour[ 3 ] = colour[ 3 ] >> 1;
+//                    lastPixel = -1;
+//                }
+
                     put( d, (baseHeight + y), colour );
                 }
-                lastPixel = pixel;
 
-                int py = (halfYRes + y );
+//
+//            for (int y = baseHeight; y >=0; --y) {
+//
+//                colour[ 0 ] = 0;
+//                colour[ 1 ] = static_cast<int>((255.0f * y)/baseHeight);
+//                colour[ 2 ] = 0;
+//                colour[ 3 ] = 0;
+//
+//                fill( d, (yRes - (baseHeight) + y), 1, 1, colour );
+//            }
 
-                if ( py < yRes ) {
-                    fill( d, py, 1, 1, colour );
-                }
+//            for (int z = 2; z < rayCollision.mSquaredDistance; ++z ) {
+//
+//                colour[ 0 ] = 0;
+//                colour[ 1 ] = 255;//static_cast<int>((255.0f * z)/40);
+//                colour[ 2 ] = 0;
+//                colour[ 3 ] = 0;
+//
+//
+//                fill( d, (halfYRes + (yRes / z) ), 1, 1, colour );
+//
+//                colour[ 0 ] = 0;
+//                colour[ 1 ] = 128;//static_cast<int>((255.0f * z)/40);
+//                colour[ 2 ] = 0;
+//                colour[ 3 ] = 0;
+//
+//                fill( d, (halfYRes + (yRes / (z - 1)) ), 1, 1, colour );
+//
+//
+////
+////                colour[ 0 ] = 0;
+////                colour[ 1 ] = 0;
+////                colour[ 2 ] = 0;
+////                colour[ 3 ] = 0;
+////
+////                baseHeight = ( (yRes / z) );
+////                dy = (yRes / (z - 1)) - baseHeight;
+////                baseHeight += halfYRes;
+////
+////                for (int y = 0; y <= dy; ++y) {
+////
+////                    int v = ((textureHeight * y) / dy);
+////
+////                    if ( v >= textureHeight ) {
+////                        v -= textureHeight;
+////                    }
+////
+////                    int pixel = textureData[( textureWidth * v) + pixelColumn];
+////
+////                    if ( pixel != lastPixel ) {
+////                        int r = static_cast<unsigned char>((pixel & 0xFF) >> 0);
+////                        int g = static_cast<unsigned char>((pixel & 0x00FF00) >> 8);
+////                        int b = static_cast<unsigned char>((pixel & 0xFF0000) >> 16);
+////                        colour[ 0 ] = 0;
+////                        colour[ 1 ] = r;
+////                        colour[ 2 ] = g;
+////                        colour[ 3 ] = b;
+////                    }
+////                    lastPixel = pixel;
+////
+////                    fill( d, (baseHeight + y), 1, 1, colour );
+////                }
+//            }
+
+
+                colour[ 0 ] = 0;
+                colour[ 1 ] = 0;
+                colour[ 2 ] = 0;
+                colour[ 3 ] = 0;
+
             }
+
+            int index = 0;
+            lastDistance = -1;
+//        for ( const auto& actor : mActorsRendered ) {
+//
+//            if ( mCachedDistances[index] != lastDistance ) {
+//                columnHeight = (yRes / mCachedDistances[index]);
+//                baseHeight = (halfYRes - (columnHeight) );
+//            }
+//            lastDistance = mCachedDistances[index];
+//
+//            draw( textures[ 4  ],
+//                  mCachedAngle[ index ],
+//                  baseHeight,
+//                  2 * columnHeight,
+//                  2 * columnHeight,
+//                  mCachedDistances[index]);
+//            ++index;
+//        }
+
+            mCachedAngle.clear();
+            mActorsRendered.clear();
+//        mCachedDistances.clear();
+
         }
 
-        int index = 0;
-        lastDistance = -1;
-        for ( const auto& actor : mActorsRendered ) {
-
-            if ( mCachedDistances[index] != lastDistance ) {
-                columnHeight = (yRes / mCachedDistances[index]);
-                baseHeight = (halfYRes - (columnHeight) );
-            }
-            lastDistance = mCachedDistances[index];
-
-            draw( textures[ 3  ],
-                  mCachedAngle[ index ],
-                  baseHeight,
-                  2 * columnHeight,
-                  2 * columnHeight,
-                  mCachedDistances[index]);
-            ++index;
-        }
-
-        mCachedAngle.clear();
-        mActorsRendered.clear();
-        mCachedDistances.clear();
 
         flip();
     }
@@ -269,9 +350,8 @@ namespace odb {
         RayCollision collision;
         int angle = wrap360(360 - (mAngle + offset));
 
-        fixed_point<int32_t, -16> sin_a = sines[angle];
-        fixed_point<int32_t, -16> cos_a = cossines[angle];
-
+        auto sin_a = sines[angle];
+        auto cos_a = cossines[angle];
         auto distance = fixed_point<int32_t, -16>{0};
         auto one = fixed_point<int32_t, -16>{1};
         int intX = static_cast<int>(rx);
@@ -285,12 +365,12 @@ namespace odb {
             distance += increment;
             intX = std::min( 39, std::max( 0, static_cast<int>(rx) ));
             intY = std::min( 39, std::max( 0, static_cast<int>(ry) ));
-            auto actor = mActors[ intY ][ intX ];
-            if ( actor ) {
-                mCachedDistances.push_back(static_cast<float>( multiply( distance, cossines[ wrap360( offset ) ] )));
-                mActorsRendered.insert(actor);
-                mCachedAngle.push_back(d);
-            }
+//            auto actor = mActors[ intY ][ intX ];
+//            if ( actor ) {
+//                mCachedDistances.push_back(sg14::multiply( distance, cossines[ wrap360( offset ) ] ));
+//                mActorsRendered.insert(actor);
+//                mCachedAngle.push_back(d);
+//            }
         }
 
         bigger = cossines[ wrap360( offset ) ] / ( one + one );

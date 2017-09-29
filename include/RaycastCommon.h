@@ -19,20 +19,20 @@ namespace odb {
 
     class RayCollision {
     public:
-        float mSquaredDistance = 0;
+        fixed_point<int32_t, -16> mSquaredDistance = 0;
         Knights::Vec2i mCollisionPoint = {0,0};
         int mHeight = 0;
         int mElement = 0;
     };
 
     using CControlCallback = std::function< void(ECommand) >;
+    using FixP = fixed_point<int32_t, -16>;
 
-
-    float Q_rsqrt( float number );
     int wrap360(int i);
 
     const int xRes = 255;
     const int yRes = 128;
+    const FixP fixedYRes = FixP{128};
 
 }
 #endif //BLANKSLATE_COMMON_H

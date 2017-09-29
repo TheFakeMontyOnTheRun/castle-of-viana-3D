@@ -79,19 +79,29 @@ namespace odb {
                 switch (event.key.keysym.sym) {
                     case SDLK_SPACE:
                         mBufferedCommand = Knights::kUseCurrentItemInInventoryCommand;
+                        mNeedsToRedraw = true;
+                        mCached = false;
                         break;
 
                     case SDLK_LEFT:
                         mBufferedCommand = Knights::kTurnPlayerLeftCommand;
+                        mNeedsToRedraw = true;
+                        mCached = false;
                         break;
                     case SDLK_RIGHT:
                         mBufferedCommand = Knights::kTurnPlayerRightCommand;
+                        mNeedsToRedraw = true;
+                        mCached = false;
                         break;
                     case SDLK_UP:
                         mBufferedCommand = Knights::kMovePlayerForwardCommand;
+                        mNeedsToRedraw = true;
+                        mCached = false;
                         break;
                     case SDLK_DOWN:
                         mBufferedCommand = Knights::kMovePlayerBackwardCommand;
+                        mNeedsToRedraw = true;
+                        mCached = false;
                         break;
 
                     default:
