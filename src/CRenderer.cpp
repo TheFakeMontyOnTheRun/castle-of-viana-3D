@@ -373,7 +373,7 @@ namespace odb {
 //            }
         }
 
-        bigger = cossines[ wrap360( offset ) ] / (  one + one );
+        bigger = ( cossines[ wrap360( offset ) ] );
         collision.mSquaredDistance = ( multiply( distance, bigger ));
 
         auto integralX = fixed_point<int32_t , -16>{intX};
