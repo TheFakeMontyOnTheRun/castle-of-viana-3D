@@ -174,7 +174,7 @@ namespace odb {
                 lastElement = rayCollision.mElement;
 
                 if ( lastDistance != rayCollision.mSquaredDistance ) {
-                    columnHeight = yRes / rayCollision.mSquaredDistance;
+                    columnHeight = static_cast<int>(divide( fixedYRes, rayCollision.mSquaredDistance ));
                 }
                 lastDistance = rayCollision.mSquaredDistance;
 
@@ -373,8 +373,8 @@ namespace odb {
 //            }
         }
 
-        bigger = cossines[ wrap360( offset ) ] / ( one + one );
-        collision.mSquaredDistance =  static_cast<float>( multiply( distance, bigger ));
+        bigger = cossines[ wrap360( offset ) ] / (  one + one );
+        collision.mSquaredDistance = ( multiply( distance, bigger ));
 
         auto integralX = fixed_point<int32_t , -16>{intX};
         auto integralY = fixed_point<int32_t , -16>{intY};
