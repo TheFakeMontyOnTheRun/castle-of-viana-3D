@@ -3,7 +3,6 @@
 #include <memory>
 #include <utility>
 #include <map>
-
 #include <cstdlib>
 #include <cstdio>
 #include <functional>
@@ -51,8 +50,8 @@ namespace odb {
 
         mCamera = current->getPosition();
         mAngle = (static_cast<int>(current->getDirection()) * 90);
-        fixed_point<int32_t , -16> angle{-45};
-        fixed_point<int32_t , -16> increment = fixed_point<int32_t , -16>{ 9.0f / 32.0f };
+        FixP angle{-45};
+        FixP increment = FixP{ 9 } / FixP{ 32 };
 
         if (!mCached ) {
             mCached = true;
@@ -91,42 +90,56 @@ namespace odb {
         }
     }
 
-    void CRenderer::draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, int zValue ) {
-//        fixed_point<int32_t, -16> stepX = fixed_point<int32_t, -16>{bitmap->getWidth() / static_cast<float>(w)};
-//        fixed_point<int32_t, -16> stepY = fixed_point<int32_t, -16>{bitmap->getHeight() / static_cast<float>(h)};
-//        int *pixelData = bitmap->getPixelData();
-//        int bWidth = bitmap->getWidth();
-//        fixed_point<int32_t, -16> px{0};
-//        fixed_point<int32_t, -16> py{0};
-//
-//        int fillDX = std::max( 1, static_cast<int>(stepX) );
-//        int fillDY = std::max( 1, static_cast<int>(stepY) );
-//        int lastTexel = -1;
-//        std::array< uint8_t, 4 > texel;
-//
-//        for ( int y = y0; y < ( y0 + h ); ++y ) {
-//            px = 0;
-//
-//            for ( int x = x0; x < ( x0 + w ); ++x ) {
-//
-//
-//                int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
-//
-//                if ( pixel != lastTexel ) {
-//                    texel = std::array<uint8_t, 4>{0,
-//                                                   static_cast<unsigned char>((pixel & 0x000000FF) >> 0),
-//                                                   static_cast<unsigned char>((pixel & 0x0000FF00) >> 8),
-//                                                   static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
-//                }
-//                lastTexel = pixel;
-//
-//                if ( ( ( pixel & 0xFF000000 ) >> 24 ) > 0 ) {
-//                    fill( x, y, fillDX, fillDY, texel);
-//                }
-//                px += stepX;
-//            }
-//            py += stepY;
-//        }
+    void CRenderer::draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, FixP zValue ) {
+        auto integerDistance = static_cast<int>(zValue);
+
+        if ( integerDistance > 40 || integerDistance < 1) {
+            return;
+        }
+
+        FixP stepX = ( FixP{ bitmap->getWidth()  } / FixP{ w } );
+        FixP stepY = ( FixP{ bitmap->getHeight() } / FixP{ h } );
+        FixP px{0};
+        FixP py{0};
+
+        int *pixelData = bitmap->getPixelData();
+        int bWidth = bitmap->getWidth();
+        int fillDX = std::max( 1, static_cast<int>(stepX) );
+        int fillDY = std::max( 1, static_cast<int>(stepY) );
+        int lastTexel = -1;
+
+        std::array< uint8_t, 4 > texel;
+
+        for ( int y = y0; y < ( y0 + h ); ++y ) {
+            px = 0;
+
+            for ( int x = x0; x < ( x0 + w ); ++x ) {
+
+
+                int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
+
+                if ( pixel != lastTexel ) {
+                    texel = std::array<uint8_t, 4>{0,
+                                                   static_cast<unsigned char>((pixel & 0x000000FF)      ),
+                                                   static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
+                                                   static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
+                }
+                lastTexel = pixel;
+
+                if ( ( ( pixel & 0xFF000000 ) > 0 ) &&
+                        ( x > -fillDX ) &&
+                        ( y > -fillDY ) &&
+                        ( x < 320 + fillDX ) &&
+                        ( y < 128 + fillDY )
+                        ) {
+                    fill( x, y, fillDX, fillDY, texel);
+                }
+                px += stepX;
+            }
+            py += stepY;
+        }
+
+        lastTexel = 0;
     }
 
     void CRenderer::render(long ms) {
@@ -245,71 +258,6 @@ namespace odb {
                     put( d, (baseHeight + y), colour );
                 }
 
-//
-//            for (int y = baseHeight; y >=0; --y) {
-//
-//                colour[ 0 ] = 0;
-//                colour[ 1 ] = static_cast<int>((255.0f * y)/baseHeight);
-//                colour[ 2 ] = 0;
-//                colour[ 3 ] = 0;
-//
-//                fill( d, (yRes - (baseHeight) + y), 1, 1, colour );
-//            }
-
-//            for (int z = 2; z < rayCollision.mSquaredDistance; ++z ) {
-//
-//                colour[ 0 ] = 0;
-//                colour[ 1 ] = 255;//static_cast<int>((255.0f * z)/40);
-//                colour[ 2 ] = 0;
-//                colour[ 3 ] = 0;
-//
-//
-//                fill( d, (halfYRes + (yRes / z) ), 1, 1, colour );
-//
-//                colour[ 0 ] = 0;
-//                colour[ 1 ] = 128;//static_cast<int>((255.0f * z)/40);
-//                colour[ 2 ] = 0;
-//                colour[ 3 ] = 0;
-//
-//                fill( d, (halfYRes + (yRes / (z - 1)) ), 1, 1, colour );
-//
-//
-////
-////                colour[ 0 ] = 0;
-////                colour[ 1 ] = 0;
-////                colour[ 2 ] = 0;
-////                colour[ 3 ] = 0;
-////
-////                baseHeight = ( (yRes / z) );
-////                dy = (yRes / (z - 1)) - baseHeight;
-////                baseHeight += halfYRes;
-////
-////                for (int y = 0; y <= dy; ++y) {
-////
-////                    int v = ((textureHeight * y) / dy);
-////
-////                    if ( v >= textureHeight ) {
-////                        v -= textureHeight;
-////                    }
-////
-////                    int pixel = textureData[( textureWidth * v) + pixelColumn];
-////
-////                    if ( pixel != lastPixel ) {
-////                        int r = static_cast<unsigned char>((pixel & 0xFF) >> 0);
-////                        int g = static_cast<unsigned char>((pixel & 0x00FF00) >> 8);
-////                        int b = static_cast<unsigned char>((pixel & 0xFF0000) >> 16);
-////                        colour[ 0 ] = 0;
-////                        colour[ 1 ] = r;
-////                        colour[ 2 ] = g;
-////                        colour[ 3 ] = b;
-////                    }
-////                    lastPixel = pixel;
-////
-////                    fill( d, (baseHeight + y), 1, 1, colour );
-////                }
-//            }
-
-
                 colour[ 0 ] = 0;
                 colour[ 1 ] = 0;
                 colour[ 2 ] = 0;
@@ -319,26 +267,28 @@ namespace odb {
 
             int index = 0;
             lastDistance = -1;
-//        for ( const auto& actor : mActorsRendered ) {
-//
-//            if ( mCachedDistances[index] != lastDistance ) {
-//                columnHeight = (yRes / mCachedDistances[index]);
-//                baseHeight = (halfYRes - (columnHeight) );
-//            }
-//            lastDistance = mCachedDistances[index];
-//
-//            draw( textures[ 4  ],
-//                  mCachedAngle[ index ],
-//                  baseHeight,
-//                  2 * columnHeight,
-//                  2 * columnHeight,
-//                  mCachedDistances[index]);
-//            ++index;
-//        }
+
+            for ( const auto& actor : mActorsRendered ) {
+
+                if ( mCachedDistances[index] != lastDistance ) {
+                    columnHeight = (yRes / mCachedDistances[index]);
+                    baseHeight = (halfYRes - (columnHeight) );
+                }
+
+                lastDistance = mCachedDistances[index];
+
+                draw( textures[ 4  ],
+                      mCachedAngle[ index ],
+                      baseHeight,
+                      2 * columnHeight,
+                      2 * columnHeight,
+                      mCachedDistances[index]);
+                ++index;
+            }
 
             mCachedAngle.clear();
             mActorsRendered.clear();
-//        mCachedDistances.clear();
+            mCachedDistances.clear();
 
         }
 
@@ -373,12 +323,13 @@ namespace odb {
             distance += increment;
             intX = std::min( 39, std::max( 0, static_cast<int>(rx) ));
             intY = std::min( 39, std::max( 0, static_cast<int>(ry) ));
-//            auto actor = mActors[ intY ][ intX ];
-//            if ( actor ) {
-//                mCachedDistances.push_back(sg14::multiply( distance, cossines[ wrap360( offset ) ] ));
-//                mActorsRendered.insert(actor);
-//                mCachedAngle.push_back(d);
-//            }
+            auto actor = mActors[ intY ][ intX ];
+
+            if ( actor && std::count( std::begin(mActorsRendered), std::end(mActorsRendered), actor ) == 0 ) {
+                mCachedDistances.push_back(sg14::multiply( distance, cossines[ wrap360( offset ) ] ));
+                mActorsRendered.push_back(actor);
+                mCachedAngle.push_back(d);
+            }
         }
 
         bigger = ( cossines[ wrap360( offset ) ] / (  one + one  ) );

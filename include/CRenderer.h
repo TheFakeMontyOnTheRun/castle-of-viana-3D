@@ -16,13 +16,13 @@ namespace odb {
         Knights::Vec2i mCamera;
         int mAngle = 0;
         Knights::CommandType mBufferedCommand = '.';
-        std::set<int> mActorsRendered;
+        vector<int> mActorsRendered;
         vector<fixed_point<int32_t, -16>> mCachedDistances;
         vector<int> mCachedAngle;
         bool mNeedsToRedraw = true;
     public:
         void drawMap( Knights::CMap& map, std::shared_ptr<Knights::CActor> current ) override;
-        void draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, int zValue );
+        void draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, FixP zValue );
         Knights::CommandType getInput() override;
     private:
         int zBuffer[ 320 ];
