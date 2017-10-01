@@ -298,20 +298,20 @@ namespace odb {
 
 
     RayCollision CRenderer::castRay(int d, int offset, const array<array< int, 40>, 40> &map) {
-        const static Knights::Vec2i blockSize = {fixed_point<int32_t, -16>(32), fixed_point<int32_t, -16>(32)};
-        fixed_point<int32_t, -16> rx0 = fixed_point<int32_t , -16>{mCamera.x};
-        fixed_point<int32_t, -16> ry0 = fixed_point<int32_t , -16>{mCamera.y};
+        const static Knights::Vec2i blockSize = {FixP(32), FixP(32)};
+        FixP rx0 = FixP{mCamera.x};
+        FixP ry0 = FixP{mCamera.y};
 
-        fixed_point<int32_t, -16> rx = rx0;
-        fixed_point<int32_t, -16> ry = ry0;
+        FixP rx = rx0;
+        FixP ry = ry0;
 
         RayCollision collision;
         int angle = wrap360(360 - (mAngle + offset));
 
         auto sin_a = sines[angle];
         auto cos_a = cossines[angle];
-        auto distance = fixed_point<int32_t, -16>{0};
-        auto one = fixed_point<int32_t, -16>{1};
+        auto distance = FixP{0};
+        auto one = FixP{1};
         int intX = static_cast<int>(rx);
         int intY = static_cast<int>(ry);
         auto bigger = std::max( cos_a, sin_a );
@@ -335,8 +335,8 @@ namespace odb {
         bigger = ( cossines[ wrap360( offset ) ] / (  one + one  ) );
         collision.mSquaredDistance = ( multiply( distance, bigger ));
 
-        auto integralX = fixed_point<int32_t , -16>{intX};
-        auto integralY = fixed_point<int32_t , -16>{intY};
+        auto integralX = FixP{intX};
+        auto integralY = FixP{intY};
 
         collision.mCollisionPoint = Knights::Vec2i{
                 static_cast<int>(multiply( blockSize.x, (rx - integralX ) )),
