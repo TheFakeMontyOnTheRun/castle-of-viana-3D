@@ -227,12 +227,20 @@ namespace odb {
                     }
                     lastPixel = pixel;
 
-//                if ( pixelColumn != ux && pixelColumn != uz ) {
-//                    colour[ 1 ] = colour[ 1 ] >> 1;
-//                    colour[ 2 ] = colour[ 2 ] >> 1;
-//                    colour[ 3 ] = colour[ 3 ] >> 1;
-//                    lastPixel = -1;
-//                }
+                    if ( uz == 0 ) {
+                        colour[ 1 ] = (colour[ 1 ] >> 1) + (colour[ 1 ] >> 2);
+                        colour[ 2 ] = (colour[ 2 ] >> 1) + (colour[ 2 ] >> 2);
+                        colour[ 3 ] = (colour[ 3 ] >> 1) + (colour[ 3 ] >> 2);
+                        lastPixel = -1;
+                    }
+
+
+                    if ( 0 == ux || ux >= 24 ) {
+                        colour[ 1 ] = (colour[ 1 ] >> 1) + (colour[ 1 ] >> 2) + (colour[ 1 ] >> 2);
+                        colour[ 2 ] = (colour[ 2 ] >> 1) + (colour[ 2 ] >> 2) + (colour[ 2 ] >> 2);
+                        colour[ 3 ] = (colour[ 3 ] >> 1) + (colour[ 3 ] >> 2) + (colour[ 3 ] >> 2);
+                        lastPixel = -1;
+                    }
 
                     put( d, (baseHeight + y), colour );
                 }
