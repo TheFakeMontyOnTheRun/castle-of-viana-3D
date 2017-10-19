@@ -32,13 +32,33 @@ using sg14::fixed_point;
 #include "NativeBitmap.h"
 #include "LoadPNG.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#endif
+
 namespace odb {
 
     SDL_Surface *video;
 
+#ifdef __EMSCRIPTEN__
+    void enterFullScreenMode() {
+    EmscriptenFullscreenStrategy s;
+    memset(&s, 0, sizeof(s));
+    s.scaleMode = EMSCRIPTEN_FULLSCREEN_SCALE_ASPECT;
+    s.canvasResolutionScaleMode = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_NONE;
+    s.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
+    emscripten_enter_soft_fullscreen(0, &s);
+}
+#endif
+
+
     CRenderer::CRenderer() {
         SDL_Init( SDL_INIT_EVERYTHING );
         video = SDL_SetVideoMode( 320, 200, 32, 0 );
+
+#ifdef __EMSCRIPTEN__
+        enterFullScreenMode();
+#endif
 
         for ( int c = 0; c < 360; ++c ) {
             auto sin_a = fixed_point<int32_t , -16>{(std::sin((c * 3.14159f) / 180.0f)) / 16.0f};
