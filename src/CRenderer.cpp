@@ -90,6 +90,45 @@ namespace odb {
         }
     }
 
+    void CRenderer::bitblt( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0 ) {
+
+        int stepX = 1;
+        int stepY = 1;
+        int px{0};
+        int py{0};
+
+        int *pixelData = bitmap->getPixelData();
+        int bWidth = bitmap->getWidth();
+        int bHeight = bitmap->getHeight();
+        int lastTexel = -1;
+
+        array< uint8_t, 4 > texel;
+
+        for ( int y = y0; y < ( y0 + bHeight ); ++y ) {
+            px = 0;
+
+            for ( int x = x0; x < ( x0 + bWidth ); ++x ) {
+
+
+                int pixel = pixelData[ ( bWidth * py ) + px ];
+
+                if ( pixel != lastTexel ) {
+                    texel = array<uint8_t, 4>{0,
+                                                   static_cast<unsigned char>((pixel & 0x000000FF)      ),
+                                                   static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
+                                                   static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
+                }
+                lastTexel = pixel;
+
+                if ( ( ( pixel & 0xFF000000 ) > 0 ) ) {
+                    putRaw( x, y, texel );
+                }
+                px += stepX;
+            }
+            py += stepY;
+        }
+    }
+
     void CRenderer::draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, FixP zValue ) {
         auto integerDistance = static_cast<int>(zValue);
 
@@ -108,7 +147,7 @@ namespace odb {
         int fillDY = std::max( 1, static_cast<int>(stepY) );
         int lastTexel = -1;
 
-        std::array< uint8_t, 4 > texel;
+        array< uint8_t, 4 > texel;
 
         for ( int y = y0; y < ( y0 + h ); ++y ) {
             px = 0;
@@ -119,7 +158,7 @@ namespace odb {
                 int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
 
                 if ( pixel != lastTexel ) {
-                    texel = std::array<uint8_t, 4>{0,
+                    texel = array<uint8_t, 4>{0,
                                                    static_cast<unsigned char>((pixel & 0x000000FF)      ),
                                                    static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
                                                    static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
@@ -138,8 +177,6 @@ namespace odb {
             }
             py += stepY;
         }
-
-        lastTexel = 0;
     }
 
     void CRenderer::render(long ms) {
@@ -165,7 +202,7 @@ namespace odb {
             int ux = -1;
             int uz = -1;
             int lastPixel = -1;
-            std::array<uint8_t ,4> colour;
+            array<uint8_t ,4> colour;
             int baseHeight = -1;
             int lastHeight = -1;
             int pixelColumn = -1;
@@ -216,8 +253,10 @@ namespace odb {
                     zBuffer[d] = columnHeight;
                 }
 
-                fill(d, 0,        1, baseHeight,     {0, 96, 96, 96});
-                fill(d, yRes - (baseHeight), 1, baseHeight, {0, 192, 192, 192});
+                if ( baseHeight >= 0 ) {
+                    fill( 32 + d, 0,        1, baseHeight,     {0, 96, 96, 96});
+                    fill( 32 + d, yRes - (baseHeight), 1, baseHeight, {0, 192, 192, 192});
+                }
 
                 for (int y = 0; y <= dy; ++y) {
 
@@ -255,7 +294,11 @@ namespace odb {
                         lastPixel = -1;
                     }
 
-                    put( d, (baseHeight + y), colour );
+                    int finalY = (baseHeight + y);
+
+                    if ( finalY >= 0 && finalY < yRes ) {
+                        put( 32 + d, finalY, colour );
+                    }
                 }
 
                 colour[ 0 ] = 0;
@@ -278,7 +321,7 @@ namespace odb {
                 lastDistance = mCachedDistances[index];
 
                 draw( textures[ 4  ],
-                      mCachedAngle[ index ],
+                      32 + mCachedAngle[ index ],
                       baseHeight,
                       2 * columnHeight,
                       2 * columnHeight,
@@ -290,8 +333,9 @@ namespace odb {
             mActorsRendered.clear();
             mCachedDistances.clear();
 
+            fillSidebar();
+            fillUnderbar();
         }
-
 
         flip();
     }
@@ -314,9 +358,10 @@ namespace odb {
         auto one = FixP{1};
         int intX = static_cast<int>(rx);
         int intY = static_cast<int>(ry);
-        auto bigger = std::max( cos_a, sin_a );
+        FixP bigger;
 
         auto increment = one;
+
         while (!map[intY][intX]) {
             rx -= sin_a;
             ry -= cos_a;
@@ -353,5 +398,23 @@ namespace odb {
         auto toReturn = mBufferedCommand;
         mBufferedCommand = '.';
         return toReturn;
+    }
+
+    void CRenderer::fillSidebar() {
+        bitblt( textures[ 2 ], 0, 0 * 32 );
+        bitblt( textures[ 2 ], 0, 1 * 32 );
+        bitblt( textures[ 2 ], 0, 2 * 32 );
+        bitblt( textures[ 2 ], 0, 3 * 32 );
+
+        bitblt( textures[ 2 ], 32 + 256, 0 * 32 );
+        bitblt( textures[ 2 ], 32 + 256, 1 * 32 );
+        bitblt( textures[ 2 ], 32 + 256, 2 * 32 );
+        bitblt( textures[ 2 ], 32 + 256, 3 * 32 );
+    }
+
+    void CRenderer::fillUnderbar() {
+        for ( int x = 0; x < 10; ++x ) {
+            bitblt( textures[ 2 ], x * 32, 128 );
+        }
     }
 }

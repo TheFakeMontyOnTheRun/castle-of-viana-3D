@@ -23,17 +23,24 @@ namespace odb {
     public:
         void drawMap( Knights::CMap& map, std::shared_ptr<Knights::CActor> current ) override;
         void draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, FixP zValue );
+        void bitblt( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0 );
         Knights::CommandType getInput() override;
     private:
         int zBuffer[ 320 ];
-        void fill( int x1, int y1, int w, int h, const std::array<uint8_t,4>& colour );
-        void put( int x, int y, const std::array<uint8_t,4>& colour );
+        void fill( int x1, int y1, int w, int h, const array<uint8_t,4>& colour );
+        void put( int x, int y, const array<uint8_t,4>& colour );
         void flip();
      public:
         CRenderer();
         void render( long ms );
         void handleSystemEvents();
         void sleep( long ms );
+
+        void fillSidebar();
+
+        void fillUnderbar();
+
+        void putRaw(int x, int y, const array<uint8_t, 4>& array);
     };
 }
 #endif

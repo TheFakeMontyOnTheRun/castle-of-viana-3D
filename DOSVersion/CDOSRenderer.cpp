@@ -49,18 +49,28 @@ using sg14::fixed_point;
 
 namespace odb {
 
-  std::array<int, 320 * 128> mBuffer;
+  array<int, 320 * 200> mBuffer;
 
   int offset = 0;
-  std::array< unsigned char, 320 * 128 > buffer;
+  array< unsigned char, 320 * 200 > buffer;
   int origin = 0;
   int lastOrigin = -1;
   unsigned char shade;
   long frame = 0;
 
+    void CRenderer::putRaw(int x, int y, const array<uint8_t, 4>& colour) {
+        int pixel = colour[ 1 ] & 0xFF;
+        pixel += (colour[ 2 ] & 0xFF) << 8;
+        pixel += (colour[ 3 ] & 0xFF) << 16;
 
+        if ( x < 0 || x >= 320 || y < 0 || y > 199 ) {
+            return;
+        }
 
-    void CRenderer::put( int x, int y, const std::array<uint8_t ,4>& colour ) {
+        mBuffer[ (320 * y ) + x ] = pixel;
+    }
+
+    void CRenderer::put( int x, int y, const array<uint8_t ,4>& colour ) {
         int pixel = colour[ 1 ] & 0xFF;
         pixel += (colour[ 2 ] & 0xFF) << 8;
         pixel += (colour[ 3 ] & 0xFF) << 16;
@@ -72,7 +82,7 @@ namespace odb {
         mBuffer[ (320 * y ) + x ] = pixel;
     }
 
-  void CRenderer::fill( int x1, int y1, int w, int h, const std::array<uint8_t,4>& colour ) {
+  void CRenderer::fill( int x1, int y1, int w, int h, const array<uint8_t,4>& colour ) {
       int _x0 = std::min( 319, std::max( 0, x1) );
       int _x1 = std::min( 319, std::max( 0,  (x1 + w) ) );
       int _y0 = std::min( 127, std::max( 0,  y1 ) );
@@ -183,7 +193,7 @@ namespace odb {
   void CRenderer::flip() {
       auto source = std::begin(mBuffer);
       auto destination = std::begin(buffer);
-    for( int offset = 0; offset < 320 * 128; ++offset ) {
+    for( int offset = 0; offset < 320 * 200; ++offset ) {
 
         auto origin = *source;
 
@@ -199,7 +209,7 @@ namespace odb {
         destination = std::next( destination );
     }
     
-    dosmemput(&buffer[0], 320 * 128, 0xa0000);
+    dosmemput(&buffer[0], 320 * 200, 0xa0000);
 
       gotoxy(1,1);
       printf( "%d", ++frame);

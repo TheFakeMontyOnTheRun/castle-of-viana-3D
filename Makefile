@@ -3,7 +3,7 @@ CXX = clang++
 SDL_LIB = `sdl-config --libs` -lSDL_gfx -lSDL_image -lSDL_mixer
 SDL_INCLUDE =  `sdl-config --cflags `
 
-CXXFLAGS = -std=c++14 -O2 -g $(SDL_INCLUDE) -Iinclude -Ifixed_point/include -Istb -Inoudar-core/noudar-core/include  -I../noudar-core/EASTL/include -I../noudar-core/EASTL/test/packages/EABase/include/Common
+CXXFLAGS = -std=c++14 -O2 -g $(SDL_INCLUDE) -Iinclude -Ifixed_point/include -Istb -Icore/noudar-core/include  -Icore/EASTL/include -Icore/EASTL/test/packages/EABase/include/Common 
 
 OBJS = SDLVersion/main.o \
         SDLVersion/CSDLRenderer.o \
@@ -11,36 +11,35 @@ OBJS = SDLVersion/main.o \
         src/RaycastCommon.o \
         src/NativeBitmap.o \
         src/LoadPNG.o \
-        noudar-core/noudar-core/src/Vec2i.o \
-        noudar-core/noudar-core/src/CActor.o \
-        noudar-core/noudar-core/src/CMonster.o \
-        noudar-core/noudar-core/src/CMonsterGenerator.o \
-        noudar-core/noudar-core/src/CTeam.o \
-        noudar-core/noudar-core/src/CMap.o \
-        noudar-core/noudar-core/src/Common.o \
-        noudar-core/noudar-core/src/CHuntApproach.o \
-        noudar-core/noudar-core/src/CCharacter.o \
-        noudar-core/noudar-core/src/CCharacterArchetype.o \
-        noudar-core/noudar-core/src/CDoorway.o \
-        noudar-core/noudar-core/src/IFileLoaderDelegate.o \
-        noudar-core/noudar-core/src/IMapElement.o \
-        noudar-core/noudar-core/src/CGame.o \
-        noudar-core/noudar-core/src/CItem.o \
-        noudar-core/noudar-core/src/CStorageItem.o \
-        noudar-core/noudar-core/src/CPlainFileLoader.o \
-        noudar-core/noudar-core/src/CGameDelegate.o \
-        noudar-core/noudar-core/src/commands/IGameCommand.o \
-        noudar-core/noudar-core/src/commands/CMoveActorCommand.o \
-        noudar-core/noudar-core/src/commands/CLoadNewLevelCommand.o \
-        noudar-core/noudar-core/src/commands/CTurnActorCommand.o \
-        noudar-core/noudar-core/src/commands/CQuitCommand.o \
-        noudar-core/noudar-core/src/commands/CNullCommand.o \
-        noudar-core/noudar-core/src/commands/CEndTurnCommand.o \
-        noudar-core/noudar-core/src/commands/CPickItemCommand.o \
-        noudar-core/noudar-core/src/commands/CDropItemCommand.o \
-        noudar-core/noudar-core/src/commands/CUseCurrentItemCommand.o \
-        noudar-core/noudar-core/src/commands/CCycleNextItemCommand.o \
-        noudar-core/noudar-core/src/commands/CCyclePreviousItemCommand.o
+        core/noudar-core/src/Vec2i.o \
+        core/noudar-core/src/CActor.o \
+        core/noudar-core/src/CMonster.o \
+        core/noudar-core/src/CMonsterGenerator.o \
+        core/noudar-core/src/CTeam.o \
+        core/noudar-core/src/CMap.o \
+        core/noudar-core/src/Common.o \
+        core/noudar-core/src/CCharacter.o \
+        core/noudar-core/src/CCharacterArchetype.o \
+        core/noudar-core/src/CDoorway.o \
+        core/noudar-core/src/IFileLoaderDelegate.o \
+        core/noudar-core/src/IMapElement.o \
+        core/noudar-core/src/CGame.o \
+        core/noudar-core/src/CItem.o \
+        core/noudar-core/src/CStorageItem.o \
+        core/noudar-core/src/CPlainFileLoader.o \
+        core/noudar-core/src/CGameDelegate.o \
+        core/noudar-core/src/commands/IGameCommand.o \
+        core/noudar-core/src/commands/CMoveActorCommand.o \
+        core/noudar-core/src/commands/CLoadNewLevelCommand.o \
+        core/noudar-core/src/commands/CTurnActorCommand.o \
+        core/noudar-core/src/commands/CQuitCommand.o \
+        core/noudar-core/src/commands/CNullCommand.o \
+        core/noudar-core/src/commands/CEndTurnCommand.o \
+        core/noudar-core/src/commands/CPickItemCommand.o \
+        core/noudar-core/src/commands/CDropItemCommand.o \
+        core/noudar-core/src/commands/CUseCurrentItemCommand.o \
+        core/noudar-core/src/commands/CCycleNextItemCommand.o \
+        core/noudar-core/src/commands/CCyclePreviousItemCommand.o
 
 LIBS = $(SDL_LIB)
 TARGET = game

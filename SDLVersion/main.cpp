@@ -63,6 +63,12 @@ void gameLoopTick() {
     renderer->handleSystemEvents();
 }
 
+std::shared_ptr<Knights::CGame> game;
+
+void sysTick() {
+    game->tick();
+    gameLoopTick();
+}
 
 int main() {
 
@@ -71,7 +77,7 @@ int main() {
 
     auto delegate = std::make_shared<Knights::CGameDelegate>();
     auto fileLoader = std::make_shared<Knights::CPlainFileLoader>();
-    auto game = std::make_shared<Knights::CGame>( fileLoader, renderer, delegate );
+    game = std::make_shared<Knights::CGame>( fileLoader, renderer, delegate );
 
     auto onLevelLoaded = [&]() {
         if ( game->getLevelNumber() >= LEVEL_LIMIT ) {
@@ -83,7 +89,7 @@ int main() {
 
 #ifdef __EMSCRIPTEN__
     //  emscripten_request_fullscreen(0, 1);
-  emscripten_set_main_loop( gameLoopTick, 30, 1 );
+  emscripten_set_main_loop( sysTick, 30, 1 );
 #else
 
     game->endOfTurn(game->getMap());

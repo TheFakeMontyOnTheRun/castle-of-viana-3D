@@ -38,7 +38,7 @@ namespace odb {
 
     CRenderer::CRenderer() {
         SDL_Init( SDL_INIT_EVERYTHING );
-        video = SDL_SetVideoMode( xRes, yRes, 32, 0 );
+        video = SDL_SetVideoMode( 320, 200, 32, 0 );
 
         for ( int c = 0; c < 360; ++c ) {
             auto sin_a = fixed_point<int32_t , -16>{(std::sin((c * 3.14159f) / 180.0f)) / 16.0f};
@@ -50,7 +50,9 @@ namespace odb {
     }
 
     void CRenderer::sleep( long ms ) {
+#ifndef __EMSCRIPTEN__
         SDL_Delay(33);
+#endif
     }
 
     void CRenderer::handleSystemEvents() {
@@ -112,7 +114,7 @@ namespace odb {
         }
     }
 
-    void CRenderer::fill( int x1, int y1, int w, int h, const std::array<uint8_t ,4>& colour ) {
+    void CRenderer::fill( int x1, int y1, int w, int h, const array<uint8_t ,4>& colour ) {
         SDL_Rect rect;
         rect.x = x1;
         rect.y = y1;
@@ -122,7 +124,7 @@ namespace odb {
         SDL_FillRect(video, &rect, SDL_MapRGB(video->format, colour[ 1 ], colour[ 2 ], colour[ 3 ] ) );
     }
 
-    void CRenderer::put( int x, int y, const std::array<uint8_t ,4>& colour ) {
+    void CRenderer::put( int x, int y, const array<uint8_t ,4>& colour ) {
         SDL_Rect rect;
         rect.x = x;
         rect.y = y;
@@ -132,6 +134,9 @@ namespace odb {
         SDL_FillRect(video, &rect, SDL_MapRGB(video->format, colour[ 1 ], colour[ 2 ], colour[ 3 ] ) );
     }
 
+    void CRenderer::putRaw( int x, int y, const array<uint8_t ,4>& colour ) {
+        put( x, y, colour );
+    }
 
     void CRenderer::flip() {
         SDL_Flip(video);
