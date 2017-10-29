@@ -211,7 +211,8 @@ namespace odb {
     
     dosmemput(&buffer[0], 320 * 200, 0xa0000);
 
-      gotoxy(1,1);
+      gotoxy(1,21);
+      printf( "%s\n", mCameraActor->getSelectedItem()->to_string().c_str());
       printf( "%d", ++frame);
 
 

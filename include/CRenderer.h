@@ -19,6 +19,7 @@ namespace odb {
         vector<int> mActorsRendered;
         vector<fixed_point<int32_t, -16>> mCachedDistances;
         vector<int> mCachedAngle;
+        std::shared_ptr<Knights::CActor> mCameraActor = nullptr;
         bool mNeedsToRedraw = true;
     public:
         void drawMap( Knights::CMap& map, std::shared_ptr<Knights::CActor> current ) override;
