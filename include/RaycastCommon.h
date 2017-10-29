@@ -17,16 +17,17 @@ namespace odb {
         kFire2
     };
 
+    using FixP = fixed_point<int32_t, -16>;
+
     class RayCollision {
     public:
-        fixed_point<int32_t, -16> mSquaredDistance = 0;
+        FixP mSquaredDistance = 0;
         Knights::Vec2i mCollisionPoint = {0,0};
         int mHeight = 0;
         int mElement = 0;
     };
 
     using CControlCallback = std::function< void(ECommand) >;
-    using FixP = fixed_point<int32_t, -16>;
 
     int wrap360(int i);
 
