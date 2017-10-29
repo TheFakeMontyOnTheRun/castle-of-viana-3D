@@ -43,7 +43,6 @@ using sg14::fixed_point;
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/html5.h>
-
 #endif
 
 void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags,
@@ -93,6 +92,11 @@ int main() {
 #else
 
     game->endOfTurn(game->getMap());
+
+    auto item = game->getMap()->makeItemWithSymbol('y');
+    auto avatar = game->getMap()->getAvatar();
+    avatar->giveItem(item);
+    avatar->suggestCurrentItem('y');
 
     while ( game->isPlaying() ) {
         game->tick();

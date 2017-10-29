@@ -79,6 +79,10 @@ int main() {
 #else
 
     game->endOfTurn(game->getMap());
+    auto item = game->getMap()->makeItemWithSymbol('y');
+    auto avatar = game->getMap()->getAvatar();
+    avatar->giveItem(item);
+    avatar->suggestCurrentItem('y');
 
     while ( game->isPlaying() ) {
         game->tick();
