@@ -52,6 +52,7 @@ namespace odb {
         mAngle = (static_cast<int>(current->getDirection()) * 90);
         FixP angle{-45};
         FixP increment = FixP{ 9 } / FixP{ 32 };
+        mCameraActor = current;
 
         if (!mCached ) {
             mCached = true;
