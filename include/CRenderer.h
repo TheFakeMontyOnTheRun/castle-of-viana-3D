@@ -29,7 +29,7 @@ namespace odb {
     private:
         int zBuffer[ 320 ];
         void fill( int x1, int y1, int w, int h, const array<uint8_t,4>& colour );
-        void put( int x, int y, const array<uint8_t,4>& colour );
+        void put( int x, int y, uint32_t pixel);
         void flip();
      public:
         CRenderer();
@@ -41,7 +41,7 @@ namespace odb {
 
         void fillUnderbar();
 
-        void putRaw(int x, int y, const array<uint8_t, 4>& array);
+        void putRaw(int x, int y, uint32_t pixel);
     };
 }
 #endif

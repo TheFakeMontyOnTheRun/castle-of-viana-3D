@@ -61,8 +61,8 @@ namespace odb {
 #endif
 
         for ( int c = 0; c < 360; ++c ) {
-            auto sin_a = fixed_point<int32_t , -16>{(std::sin((c * 3.14159f) / 180.0f)) / 16.0f};
-            auto cos_a = fixed_point<int32_t , -16>{(std::cos((c * 3.14159f) / 180.0f)) / 16.0f};
+            auto sin_a = fixed_point<int32_t , -16>{(std::sin((c * 3.14159f) / 180.0f)) / 32.0f};
+            auto cos_a = fixed_point<int32_t , -16>{(std::cos((c * 3.14159f) / 180.0f)) / 32.0f};
             sines[ c ] = sin_a;
             cossines[ c ] = cos_a;
         }
@@ -144,21 +144,60 @@ namespace odb {
         SDL_FillRect(video, &rect, SDL_MapRGB(video->format, colour[ 1 ], colour[ 2 ], colour[ 3 ] ) );
     }
 
-    void CRenderer::put( int x, int y, const array<uint8_t ,4>& colour ) {
+    void CRenderer::put( int x, int y, uint32_t pixel  ) {
         SDL_Rect rect;
         rect.x = x;
         rect.y = y;
         rect.w = 1;
         rect.h = 1;
 
-        SDL_FillRect(video, &rect, SDL_MapRGB(video->format, colour[ 1 ], colour[ 2 ], colour[ 3 ] ) );
+        SDL_FillRect(video, &rect, SDL_MapRGB(video->format, ((pixel & 0x000000FF) ), ((pixel & 0x0000FF00) >> 8 ), ((pixel & 0x00FF0000) >> 16) ));
     }
 
-    void CRenderer::putRaw( int x, int y, const array<uint8_t ,4>& colour ) {
-        put( x, y, colour );
+    void CRenderer::putRaw( int x, int y, uint32_t pixel ) {
+        put( x, y, pixel );
     }
 
     void CRenderer::flip() {
         SDL_Flip(video);
+    }
+
+    void CRenderer::bitblt( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0 ) {
+
+        int stepX = 1;
+        int stepY = 1;
+        int px{0};
+        int py{0};
+
+        int *pixelData = bitmap->getPixelData();
+        int bWidth = bitmap->getWidth();
+        int bHeight = bitmap->getHeight();
+//        int lastTexel = -1;
+
+//        array< uint8_t, 4 > texel;
+
+        for ( int y = y0; y < ( y0 + bHeight ); ++y ) {
+            px = 0;
+
+            for ( int x = x0; x < ( x0 + bWidth ); ++x ) {
+
+
+                int pixel = pixelData[ ( bWidth * py ) + px ];
+
+//                if ( pixel != lastTexel ) {
+//                    texel = array<uint8_t, 4>{0,
+//                                              static_cast<unsigned char>((pixel & 0x000000FF)      ),
+//                                              static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
+//                                              static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
+//                }
+//                lastTexel = pixel;
+
+                if ( ( ( pixel & 0xFF000000 ) > 0 ) ) {
+                    putRaw( x, y, pixel );
+                }
+                px += stepX;
+            }
+            py += stepY;
+        }
     }
 }

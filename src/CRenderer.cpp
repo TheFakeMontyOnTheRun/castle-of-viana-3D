@@ -91,44 +91,6 @@ namespace odb {
         }
     }
 
-    void CRenderer::bitblt( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0 ) {
-
-        int stepX = 1;
-        int stepY = 1;
-        int px{0};
-        int py{0};
-
-        int *pixelData = bitmap->getPixelData();
-        int bWidth = bitmap->getWidth();
-        int bHeight = bitmap->getHeight();
-        int lastTexel = -1;
-
-        array< uint8_t, 4 > texel;
-
-        for ( int y = y0; y < ( y0 + bHeight ); ++y ) {
-            px = 0;
-
-            for ( int x = x0; x < ( x0 + bWidth ); ++x ) {
-
-
-                int pixel = pixelData[ ( bWidth * py ) + px ];
-
-                if ( pixel != lastTexel ) {
-                    texel = array<uint8_t, 4>{0,
-                                                   static_cast<unsigned char>((pixel & 0x000000FF)      ),
-                                                   static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
-                                                   static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
-                }
-                lastTexel = pixel;
-
-                if ( ( ( pixel & 0xFF000000 ) > 0 ) ) {
-                    putRaw( x, y, texel );
-                }
-                px += stepX;
-            }
-            py += stepY;
-        }
-    }
 
     void CRenderer::draw( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0, int w, int h, FixP zValue ) {
         auto integerDistance = static_cast<int>(zValue);
@@ -146,9 +108,9 @@ namespace odb {
         int bWidth = bitmap->getWidth();
         int fillDX = std::max( 1, static_cast<int>(stepX) );
         int fillDY = std::max( 1, static_cast<int>(stepY) );
-        int lastTexel = -1;
-
-        array< uint8_t, 4 > texel;
+//        int lastTexel = -1;
+//
+//        array< uint8_t, 4 > texel;
 
         for ( int y = y0; y < ( y0 + h ); ++y ) {
             px = 0;
@@ -158,13 +120,13 @@ namespace odb {
 
                 int pixel = pixelData[ ( bWidth * static_cast<int>( py )  ) + static_cast<int>(px) ];
 
-                if ( pixel != lastTexel ) {
-                    texel = array<uint8_t, 4>{0,
-                                                   static_cast<unsigned char>((pixel & 0x000000FF)      ),
-                                                   static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
-                                                   static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
-                }
-                lastTexel = pixel;
+//                if ( pixel != lastTexel ) {
+//                    texel = array<uint8_t, 4>{0,
+//                                                   static_cast<unsigned char>((pixel & 0x000000FF)      ),
+//                                                   static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
+//                                                   static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
+//                }
+//                lastTexel = pixel;
 
                 if ( ( ( pixel & 0xFF000000 ) > 0 ) &&
                         ( x > -fillDX ) &&
@@ -172,7 +134,9 @@ namespace odb {
                         ( x < 320 + fillDX ) &&
                         ( y < 128 + fillDY )
                         ) {
-                    fill( x, y, fillDX, fillDY, texel);
+//                    fill( x, y, fillDX, fillDY, texel);
+
+                    put( x, y, pixel);
                 }
                 px += stepX;
             }
@@ -187,15 +151,15 @@ namespace odb {
             const static int halfYRes = yRes / 2;
             const static Knights::Vec2i mapSize = {40, 40};
 
-            fixed_point<int32_t , -16> angle{-45};
-            fixed_point<int32_t , -16> fov{ 90 };
-            fixed_point<int32_t , -16> width{ xRes };
-            fixed_point<int32_t , -16> increment = sg14::divide( fov, width );
+            FixP angle{-45};
+            FixP fov{ 90 };
+            FixP width{ xRes };
+            FixP increment = fov / width;
             int textureWidth;
             int textureHeight;
             int *textureData;
             int columnHeight;
-            auto lastDistance = fixed_point<int32_t , -16>{-1};
+            auto lastDistance = FixP{-1};
             int lastElement = -1;
             int dx = -1;
             int dy = -1;
@@ -203,7 +167,7 @@ namespace odb {
             int ux = -1;
             int uz = -1;
             int lastPixel = -1;
-            array<uint8_t ,4> colour;
+//            array<uint8_t ,4> colour;
             int baseHeight = -1;
             int lastHeight = -1;
             int pixelColumn = -1;
@@ -269,43 +233,43 @@ namespace odb {
 
                     int pixel = textureData[( textureWidth * v) + pixelColumn];
 
-                    if ( pixel != lastPixel ) {
-                        int r = static_cast<unsigned char>((pixel & 0xFF) >> 0);
-                        int g = static_cast<unsigned char>((pixel & 0x00FF00) >> 8);
-                        int b = static_cast<unsigned char>((pixel & 0xFF0000) >> 16);
-                        colour[ 0 ] = 0;
-                        colour[ 1 ] = r;
-                        colour[ 2 ] = g;
-                        colour[ 3 ] = b;
-                    }
-                    lastPixel = pixel;
+//                    if ( pixel != lastPixel ) {
+//                        int r = static_cast<unsigned char>((pixel & 0xFF) >> 0);
+//                        int g = static_cast<unsigned char>((pixel & 0x00FF00) >> 8);
+//                        int b = static_cast<unsigned char>((pixel & 0xFF0000) >> 16);
+//                        colour[ 0 ] = 0;
+//                        colour[ 1 ] = r;
+//                        colour[ 2 ] = g;
+//                        colour[ 3 ] = b;
+//                    }
+//                    lastPixel = pixel;
 
-                    if ( uz == 0 ) {
-                        colour[ 1 ] = (colour[ 1 ] >> 1) + (colour[ 1 ] >> 2);
-                        colour[ 2 ] = (colour[ 2 ] >> 1) + (colour[ 2 ] >> 2);
-                        colour[ 3 ] = (colour[ 3 ] >> 1) + (colour[ 3 ] >> 2);
-                        lastPixel = -1;
-                    }
+//                    if ( uz == 0 ) {
+//                        colour[ 1 ] = (colour[ 1 ] >> 1) + (colour[ 1 ] >> 2);
+//                        colour[ 2 ] = (colour[ 2 ] >> 1) + (colour[ 2 ] >> 2);
+//                        colour[ 3 ] = (colour[ 3 ] >> 1) + (colour[ 3 ] >> 2);
+//                        lastPixel = -1;
+//                    }
 
 
-                    if ( 0 == ux || ux >= 24 ) {
-                        colour[ 1 ] = (colour[ 1 ] >> 1) + (colour[ 1 ] >> 2) + (colour[ 1 ] >> 2);
-                        colour[ 2 ] = (colour[ 2 ] >> 1) + (colour[ 2 ] >> 2) + (colour[ 2 ] >> 2);
-                        colour[ 3 ] = (colour[ 3 ] >> 1) + (colour[ 3 ] >> 2) + (colour[ 3 ] >> 2);
-                        lastPixel = -1;
-                    }
+//                    if ( 0 == ux || ux >= 24 ) {
+//                        colour[ 1 ] = (colour[ 1 ] >> 1) + (colour[ 1 ] >> 2) + (colour[ 1 ] >> 2);
+//                        colour[ 2 ] = (colour[ 2 ] >> 1) + (colour[ 2 ] >> 2) + (colour[ 2 ] >> 2);
+//                        colour[ 3 ] = (colour[ 3 ] >> 1) + (colour[ 3 ] >> 2) + (colour[ 3 ] >> 2);
+//                        lastPixel = -1;
+//                    }
 
                     int finalY = (baseHeight + y);
 
                     if ( finalY >= 0 && finalY < yRes ) {
-                        put( 32 + d, finalY, colour );
+                        put( 32 + d, finalY, pixel );
                     }
                 }
 
-                colour[ 0 ] = 0;
-                colour[ 1 ] = 0;
-                colour[ 2 ] = 0;
-                colour[ 3 ] = 0;
+//                colour[ 0 ] = 0;
+//                colour[ 1 ] = 0;
+//                colour[ 2 ] = 0;
+//                colour[ 3 ] = 0;
 
             }
 
@@ -378,7 +342,7 @@ namespace odb {
             }
         }
 
-        bigger = ( cossines[ wrap360( offset ) ] / (  one + one  ) );
+        bigger = ( cossines[ wrap360( offset ) ] / (  one + one ) );
         collision.mSquaredDistance = ( multiply( distance, bigger ));
 
         auto integralX = FixP{intX};

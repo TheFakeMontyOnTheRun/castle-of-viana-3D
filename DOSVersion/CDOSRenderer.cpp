@@ -58,10 +58,7 @@ namespace odb {
   unsigned char shade;
   long frame = 0;
 
-    void CRenderer::putRaw(int x, int y, const array<uint8_t, 4>& colour) {
-        int pixel = colour[ 1 ] & 0xFF;
-        pixel += (colour[ 2 ] & 0xFF) << 8;
-        pixel += (colour[ 3 ] & 0xFF) << 16;
+    void CRenderer::putRaw(int x, int y, uint32_t pixel) {
 
         if ( x < 0 || x >= 320 || y < 0 || y > 199 ) {
             return;
@@ -70,10 +67,7 @@ namespace odb {
         mBuffer[ (320 * y ) + x ] = pixel;
     }
 
-    void CRenderer::put( int x, int y, const array<uint8_t ,4>& colour ) {
-        int pixel = colour[ 1 ] & 0xFF;
-        pixel += (colour[ 2 ] & 0xFF) << 8;
-        pixel += (colour[ 3 ] & 0xFF) << 16;
+    void CRenderer::put( int x, int y, uint32_t pixel ) {
 
         if ( x < 0 || x >= 320 || y < 0 || y >= 128 ) {
 	        return;
@@ -214,7 +208,46 @@ namespace odb {
       gotoxy(1,21);
       printf( "%s\n", mCameraActor->getSelectedItem()->to_string().c_str());
       printf( "%d", ++frame);
-
-
   }
+
+    void CRenderer::bitblt( std::shared_ptr<odb::NativeBitmap> bitmap, int x0, int y0 ) {
+
+        int stepX = 1;
+        int stepY = 1;
+        int px{0};
+        int py{0};
+
+        int *pixelData = bitmap->getPixelData();
+        int bWidth = bitmap->getWidth();
+        int bHeight = bitmap->getHeight();
+//        int lastTexel = -1;
+
+//        array< uint8_t, 4 > texel;
+
+        for ( int y = y0; y < ( y0 + bHeight ); ++y ) {
+            px = 0;
+
+            for ( int x = x0; x < ( x0 + bWidth ); ++x ) {
+
+
+                int pixel = pixelData[ ( bWidth * py ) + px ];
+
+//                if ( pixel != lastTexel ) {
+//                    texel = array<uint8_t, 4>{0,
+//                                              static_cast<unsigned char>((pixel & 0x000000FF)      ),
+//                                              static_cast<unsigned char>((pixel & 0x0000FF00) >> 8 ),
+//                                              static_cast<unsigned char>((pixel & 0x00FF0000) >> 16)};
+//                }
+//                lastTexel = pixel;
+
+                if ( ( ( pixel & 0xFF000000 ) > 0 ) ) {
+                    putRaw( x, y, pixel );
+                }
+                px += stepX;
+            }
+            py += stepY;
+        }
+    }
+
+
 }
